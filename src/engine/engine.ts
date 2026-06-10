@@ -20,6 +20,7 @@ import {
 } from './pieces'
 import { kicksFor } from './srs'
 import { SevenBag, createRng } from './rng'
+import { attackFor } from './attack'
 
 const CLEAR_POINTS = [0, 100, 300, 500, 800]
 const TSPIN_POINTS = [400, 800, 1200, 1600]
@@ -67,6 +68,8 @@ export class Engine {
 
   /** cheese mode: cheese lines not yet placed on the board */
   cheesePool = 0
+  /** versus: incoming attacks waiting in the meter (queue → cancel → enter) */
+  private pendingAttacks: number[] = []
   /** survival mode: ms until the next garbage rise */
   riseTimer = 0
   private riseInterval = 0
@@ -341,8 +344,49 @@ export class Engine {
       this.refillCheese()
     }
 
+    // versus: uncancelled garbage enters once the piece is down
+    this.enterPendingGarbage()
+    if (this.status !== 'playing') return
+
     this.holdUsed = false
     this.spawn()
+  }
+
+  // ── versus garbage (queue → cancel → enter) ────────────────────
+
+  /** queue an incoming attack; it cancels against outgoing attacks and
+   *  enters the board on a future lock */
+  queueGarbage(lines: number) {
+    if (this.status !== 'playing' || lines <= 0) return
+    this.pendingAttacks.push(lines)
+  }
+
+  /** total lines waiting in the incoming-garbage meter */
+  pendingGarbage(): number {
+    return this.pendingAttacks.reduce((a, b) => a + b, 0)
+  }
+
+  private enterPendingGarbage() {
+    if (this.pendingAttacks.length === 0) return
+    let total = 0
+    for (const lines of this.pendingAttacks) {
+      // one hole per attack; within it, each line moves the hole with
+      // probability `messiness` ("change on attack" rule, spec Ruleset)
+      let hole = Math.floor(this.garbageRng() * BOARD_W)
+      for (let i = 0; i < lines; i++) {
+        if (i > 0 && this.garbageRng() < this.cfg.attack.messiness) {
+          hole = (hole + 1 + Math.floor(this.garbageRng() * (BOARD_W - 1))) % BOARD_W
+        }
+        if (!this.pushGarbageRow(hole)) {
+          this.pendingAttacks = []
+          this.gameOver()
+          return
+        }
+        total++
+      }
+    }
+    this.pendingAttacks = []
+    this.events.push({ kind: 'garbage', rows: total })
   }
 
   /**
@@ -442,10 +486,33 @@ export class Engine {
     this.score += points
     this.lines += n
 
+    // versus: compute the attack, cancel pending garbage first, send the rest
+    const attack = attackFor(
+      { lines: n, tspin, b2b: b2bActive, combo: this.combo, perfectClear },
+      this.cfg.attack,
+    )
+    let send = attack
+    while (send > 0 && this.pendingAttacks.length > 0) {
+      const cancelled = Math.min(send, this.pendingAttacks[0])
+      send -= cancelled
+      this.pendingAttacks[0] -= cancelled
+      if (this.pendingAttacks[0] === 0) this.pendingAttacks.shift()
+    }
+    if (send > 0) this.events.push({ kind: 'attack', lines: send })
+
     if (n > 0 || tspin !== 'none') {
       this.events.push({
         kind: 'clear',
-        info: { lines: n, label, b2b: b2bActive, combo: this.combo, perfectClear, rows, points },
+        info: {
+          lines: n,
+          label,
+          b2b: b2bActive,
+          combo: this.combo,
+          perfectClear,
+          rows,
+          points,
+          attack,
+        },
       })
     }
 

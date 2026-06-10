@@ -180,7 +180,7 @@ from tetr.io source).
 | Survival (rising garbage) | ✓ | baseline | [JS] parity |
 | Marathon | ✓ | baseline | D3 implemented in M1: ends at level 15 as a win |
 | Zen / endless chill | ✗ | out→pedagogy | Mode carving belongs to pedagogy stream |
-| Battle (vs scripted pressure) | ✗ | baseline | Spec Phases 2–3 |
+| Battle (vs scripted pressure) | △ | baseline | Substrate done in M4 (attack table, queue→cancel→enter, messiness, Opponent/Match — fully tested headlessly); UI lands in M5 |
 | Online 1v1 (invite link) | ✗ | baseline | Spec Phase 4 |
 | Replays (record/playback) | △ | baseline | D5 implemented in M2: every finished game records `{version, config+seed, fixed-step action log}` (`src/engine/replay.ts`, persisted via `tetra.replays.v1`, round-trip-tested headlessly). Viewer deliberately deferred to the pedagogy Review surface |
 

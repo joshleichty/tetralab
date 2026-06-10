@@ -171,3 +171,35 @@ feel pass if chains feel flat).
 **Cross-stream flags**: `finesse.ts` is pedagogy-ready (drill grading);
 lock events now carry final placement — bot stream can consume for
 move-matching.
+
+## 2026-06-09 — M4: versus substrate (engine, headless)
+
+**This session (runner M4)**: spec Phase 2 complete, all pure engine code.
+
+- **`src/engine/attack.ts`**: `AttackConfig` (guideline table [WN]: clears
+  0/1/2/4, T-spins 2/4/6, minis 0/0/1, PC +10, B2B +1, additive FAQ combo
+  table) + `attackFor()`. Variants (TETR.IO multiplier/Surge) become
+  config later, not rewrites.
+- **Engine**: every clear computes `info.attack`; pending garbage cancels
+  first, remainder emits `{kind:'attack'}`. `queueGarbage(lines)` /
+  `pendingGarbage()` (the meter). Entry on lock — incl. the same lock that
+  partially cancelled. One hole per attack, re-rolled between attacks;
+  `messiness` = per-line move probability within an attack. Push-out
+  top-out reused. New mode `'battle'` (no levels, no engine win state).
+- **`src/engine/versus.ts`**: `Opponent` interface (tick / receiveAttack /
+  takeOutgoing / hp) — the match layer can't tell a script from a bot.
+  `ScriptedPressureOpponent`: seeded bursts paced to an average APM;
+  presets = APM × messiness. `Match`: win = deplete HP, lose = top out;
+  drives engine + opponent, routes attacks both ways, re-emits events.
+- **Tests** (+18, 126 green): attack table cited vs [WN]; cancel/partial-
+  cancel/enter; change-on-attack + messiness-1 adjacency; deterministic
+  entry; flood top-out; opponent APM averaging + determinism; three full
+  headless matches (win by HP depletion incl. B2B math, loss under
+  pressure, deterministic end-to-end active match).
+
+**Open threads**: solo engines now emit 'attack' events too (harmless,
+and the M5 APM/VS HUD will consume them). Battle replays need opponent
+timing recorded — that design belongs to M6 lockstep.
+
+**Cross-stream flag (bot)**: `Opponent` in `src/engine/versus.ts` is the
+interface a future bot implements for sparring; `Match` is the harness.

@@ -2,6 +2,8 @@
  * Core engine types. The engine is pure TypeScript with zero DOM
  * dependencies so it can be driven headlessly (RL training, replays, tests).
  */
+import type { AttackConfig } from './attack'
+import { DEFAULT_ATTACK_CONFIG } from './attack'
 
 export type PieceType = 'I' | 'O' | 'T' | 'S' | 'Z' | 'J' | 'L'
 
@@ -20,7 +22,7 @@ export interface ActivePiece {
 export const CELL_EMPTY = 0
 export const CELL_GARBAGE = 8
 
-export type Mode = 'marathon' | 'sprint' | 'blitz' | 'cheese' | 'survival'
+export type Mode = 'marathon' | 'sprint' | 'blitz' | 'cheese' | 'survival' | 'battle'
 
 export type GameStatus = 'ready' | 'playing' | 'over' | 'won'
 
@@ -34,6 +36,8 @@ export interface ClearInfo {
   /** board row indices that were cleared (before collapse) */
   rows: number[]
   points: number
+  /** lines this clear sends, before cancellation (solo modes ignore it) */
+  attack: number
 }
 
 export type GameEvent =
@@ -51,6 +55,8 @@ export type GameEvent =
   | { kind: 'hold' }
   | { kind: 'levelup'; level: number }
   | { kind: 'garbage'; rows: number }
+  /** outgoing attack after cancellation against pending garbage */
+  | { kind: 'attack'; lines: number }
   | { kind: 'gameover' }
   | { kind: 'win' }
 
@@ -76,6 +82,8 @@ export interface EngineConfig {
   riseDecayMs: number
   /** survival mode: fastest rise interval */
   riseMinMs: number
+  /** versus: attack table + garbage hole rules */
+  attack: AttackConfig
 }
 
 export const INSTANT_SDF = 41
@@ -91,6 +99,7 @@ export const DEFAULT_ENGINE_CONFIG: Omit<EngineConfig, 'seed' | 'mode'> = {
   riseStartMs: 6000,
   riseDecayMs: 120,
   riseMinMs: 1800,
+  attack: DEFAULT_ATTACK_CONFIG,
 }
 
 /** Discrete actions — the exact surface an RL agent will use. */

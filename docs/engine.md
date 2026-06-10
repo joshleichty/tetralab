@@ -14,6 +14,11 @@ substrate for the RL training mode.
 - `types.ts` — `Action`, `EngineConfig`, `GameEvent`, `ClearInfo`, cell constants
 - `pieces.ts` — piece shapes/spawns; `srs.ts` — SRS+ kick tables (D1)
 - `rng.ts` — seeded RNG (7-bag)
+- `attack.ts` — `AttackConfig` + `attackFor()`: the guideline attack
+  table ([WN]); variants become config tables, not rewrites
+- `versus.ts` — `Opponent` interface, `ScriptedPressureOpponent`
+  (seeded, APM × messiness presets), `Match` (win = deplete HP, lose =
+  top out); the bot stream's sparring partner plugs in here
 - `finesse.ts` — finesse optimum table ([HD-Finesse]): BFS over (rot, x)
   with the real kick tables; `optimalInputs(type, rot, x)`
 - `replay.ts` — replay recording/playback (D5): `STEP_MS` fixed-step grid,
@@ -39,6 +44,18 @@ e.takeEvents()                         // drain GameEvent[] (lock, clear, garbag
   `canFit(x, y, rot)` for placement search
 - `GameEvent`s carry reward-relevant info: `ClearInfo` (lines, label, b2b,
   combo, perfectClear, points), harddrop distance, gameover/win
+
+## Versus (battle substrate)
+
+- Every clear computes `info.attack` from `cfg.attack` (solo modes ignore
+  it); pending garbage cancels first, the remainder emits an
+  `{kind:'attack'}` event.
+- `queueGarbage(lines)` queues an incoming attack; `pendingGarbage()` is
+  the meter. Uncancelled garbage enters when a piece locks: one hole per
+  attack, re-rolled between attacks; `attack.messiness` is the per-line
+  probability the hole moves within an attack.
+- `Match` (versus.ts) routes attack events to an `Opponent` and opponent
+  bursts into `queueGarbage`; full matches run headlessly in vitest.
 
 ## Garbage / training modes
 - `addGarbage(rows, holeColumn)` — direct garbage insertion (clean-well drills)
