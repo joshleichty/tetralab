@@ -96,3 +96,38 @@ recording (D5).
 **Cross-stream flag**: SRS+ changes I-piece kick behavior — any future
 bot/placement-search code must use `kicksFor` rather than assuming
 plain SRS.
+
+## 2026-06-09 — M2: replay recording (D5) + fixed-timestep simulation
+
+**This session (runner M2)**: every finished game now records
+`{REPLAY_VERSION, full config incl. seed, fixed-step action log, sdf
+changes, summary}` and persists to `tetra.replays.v1` (newest-first,
+capped 20, quota-safe). No viewer (D5: pedagogy Review surface owns it).
+
+**Architecture decision**: introduced **fixed-timestep simulation**
+(`STEP_MS = 5` ms, 200 steps/s) in the controller — frame dt accumulates
+and the engine ticks in fixed steps; input DAS/ARR updates on the same
+grid (finer than the old per-frame update). Actions are stamped with step
+indices. This is the quality-bar §5.2/5.3 loop architecture and the time
+base lockstep netcode (M6) requires — replays and netcode share one grid.
+Blitz's 120 s cutoff now lands on an exact step boundary.
+
+**Lean logs**: controller filters no-op wall shoves (instant-ARR fires 10
+blind moves per update) before recording — only state-changing
+left/right actions are logged.
+
+**Tests** (`src/engine/replay.test.ts`, 7): round-trip identity (full
+state: board bytes, score/combo/b2b, queue, hold, active piece, elapsed)
+across marathon, 30k-step action-spam, survival (timer rises), cheese
+(seeded holes); mid-game SDF change honored; config snapshot isolation;
+version-mismatch playback refusal. 89 tests green; lint/build clean.
+
+**Cross-stream flags**:
+- Replay format is the contract pedagogy (Review) and bot (analysis)
+  stand on: `src/engine/replay.ts` `Replay` interface. Coordinate before
+  changing; bump `REPLAY_VERSION` on any state-visible engine change.
+- The fixed-step grid is now an invariant (docs/engine.md): drive the
+  engine in STEP_MS ticks, never variable dt.
+
+**Open threads**: replay list/viewer UI deliberately absent. Next: M3
+handling & QoL parity.

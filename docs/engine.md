@@ -14,9 +14,13 @@ substrate for the RL training mode.
 - `types.ts` — `Action`, `EngineConfig`, `GameEvent`, `ClearInfo`, cell constants
 - `pieces.ts` — piece shapes/spawns; `srs.ts` — SRS+ kick tables (D1)
 - `rng.ts` — seeded RNG (7-bag)
+- `replay.ts` — replay recording/playback (D5): `STEP_MS` fixed-step grid,
+  `ReplayRecorder`, `simulateReplay`; versioned via `REPLAY_VERSION` —
+  **bump it on any state-visible rule change**
 - `engine.test.ts` — vitest coverage; must stay green
 - `parity.test.ts` — the parity suite: encodes docs/parity.md §1–4 with
   per-test source citations; the coverage contract
+- `replay.test.ts` — record/replay round-trip identity across modes
 
 ## Driving the engine
 ```ts
@@ -62,5 +66,9 @@ Mechanics follow the guideline/modern-client baseline per `docs/parity.md`
 - No DOM, no React, no `Date.now()`/`Math.random()` — seeded RNG only;
   same seed + same action/tick sequence ⇒ identical game.
 - The UI drives the engine only through `applyAction` + `tick`; bots must too.
+- The whole stack simulates on the fixed `STEP_MS` grid (`replay.ts`): the
+  controller accumulates frame time and runs 5 ms steps; actions are
+  stamped with step indices. Replays and (future) lockstep netcode both
+  stand on this — don't reintroduce variable-dt ticking.
 - `window.__tetra` exposes the live `GameController` in the browser for
   in-page scripting/debugging.

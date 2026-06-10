@@ -1,5 +1,7 @@
 import { Engine } from '../engine/engine'
-import type { Mode } from '../engine/types'
+import { ReplayRecorder, STEP_MS } from '../engine/replay'
+import { saveReplay } from './replays'
+import type { Action, Mode } from '../engine/types'
 import { InputHandler } from '../input/keyboard'
 import type { BindableAction } from '../input/keyboard'
 import { sfx } from '../audio/sfx'
@@ -52,6 +54,10 @@ export class GameController {
   version = 0
 
   private input: InputHandler
+  private recorder: ReplayRecorder | null = null
+  /** fixed-step index since game start; the replay/netcode time base */
+  private step = 0
+  private stepAcc = 0
   private fx: BoardFx = emptyFx()
   private boardRenderer: BoardRenderer | null = null
   private holdRenderer: PreviewRenderer | null = null
@@ -69,9 +75,7 @@ export class GameController {
       { das: this.settings.das, arr: this.settings.arr },
       this.settings.bindings,
     )
-    this.input.dispatch = (a) => {
-      if (this.phase === 'playing') this.engine?.applyAction(a)
-    }
+    this.input.dispatch = (a) => this.applyAction(a)
     this.input.onPause = () => this.togglePause()
     this.input.onRestart = () => {
       if (this.phase !== 'menu') this.start(this.mode)
@@ -114,6 +118,22 @@ export class GameController {
     this.queueRenderer = canvas ? new PreviewRenderer(canvas, w, h) : null
   }
 
+  /** route an action into the engine, logging it for the replay (D5) */
+  private applyAction(a: Action) {
+    const e = this.engine
+    if (this.phase !== 'playing' || !e) return
+    // skip no-op wall shoves (instant ARR fires blind) to keep logs lean
+    if (a === 'left' || a === 'right') {
+      const p = e.active
+      const x = p?.x
+      e.applyAction(a)
+      if (e.active === p && p && p.x === x) return
+    } else {
+      e.applyAction(a)
+    }
+    this.recorder?.record(this.step, a)
+  }
+
   // ── flow control ───────────────────────────────────────────────
 
   /** cheese race size for the current/next cheese game */
@@ -129,6 +149,9 @@ export class GameController {
       sdf: this.settings.sdf,
       cheeseTotal: this.cheeseTotal,
     })
+    this.recorder = new ReplayRecorder(this.engine.cfg)
+    this.step = 0
+    this.stepAcc = 0
     this.result = null
     this.actionLabel = null
     this.fx = emptyFx()
@@ -156,6 +179,7 @@ export class GameController {
   quitToMenu() {
     this.phase = 'menu'
     this.engine = null
+    this.recorder = null
     this.result = null
     this.emit()
   }
@@ -166,7 +190,10 @@ export class GameController {
     this.input.handling = { das: this.settings.das, arr: this.settings.arr }
     this.input.bindings = this.settings.bindings
     sfx.enabled = this.settings.sound
-    if (this.engine) this.engine.cfg.sdf = this.settings.sdf
+    if (this.engine && this.engine.cfg.sdf !== this.settings.sdf) {
+      this.engine.cfg.sdf = this.settings.sdf
+      this.recorder?.recordSdf(this.step, this.settings.sdf)
+    }
     this.emit()
   }
 
@@ -199,13 +226,22 @@ export class GameController {
       }
       this.emit()
     } else if (this.phase === 'playing' && this.engine) {
-      this.input.update(dt)
-      this.engine.tick(dt)
-      this.drainEvents(t)
-      if (this.mode === 'blitz' && this.engine.status === 'playing' && this.engine.elapsed >= BLITZ_MS) {
-        this.engine.status = 'won'
-        this.finish(true)
+      // fixed-timestep simulation: deterministic on any refresh rate, and
+      // the step grid is the replay/netcode time base (docs/quality-bar §5.2)
+      this.stepAcc += dt
+      while (this.stepAcc >= STEP_MS && this.phase === 'playing') {
+        this.stepAcc -= STEP_MS
+        this.input.update(STEP_MS)
+        this.engine.tick(STEP_MS)
+        this.step++
+        if (this.engine.status !== 'playing') break
+        if (this.mode === 'blitz' && this.engine.elapsed >= BLITZ_MS) {
+          this.engine.status = 'won'
+          this.finish(true)
+          break
+        }
       }
+      this.drainEvents(t)
       this.emit()
     }
 
@@ -273,6 +309,10 @@ export class GameController {
 
   private finish(won: boolean) {
     const e = this.engine!
+    if (this.recorder) {
+      saveReplay(this.recorder.finish(e, this.step))
+      this.recorder = null
+    }
     if (won) sfx.play('win')
     const timeMs = e.elapsed
     const pps = timeMs > 0 ? e.piecesPlaced / (timeMs / 1000) : 0

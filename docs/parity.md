@@ -182,7 +182,7 @@ from tetr.io source).
 | Zen / endless chill | ✗ | out→pedagogy | Mode carving belongs to pedagogy stream |
 | Battle (vs scripted pressure) | ✗ | baseline | Spec Phases 2–3 |
 | Online 1v1 (invite link) | ✗ | baseline | Spec Phase 4 |
-| Replays (record/playback) | ✗ | DECIDE | Baseline in BOTH references ([JS] "every single game", [TIO] .ttr). Deterministic engine makes capture ~free (seed + timestamped actions); the *viewer* is the real cost. Decision D5 |
+| Replays (record/playback) | △ | baseline | D5 implemented in M2: every finished game records `{version, config+seed, fixed-step action log}` (`src/engine/replay.ts`, persisted via `tetra.replays.v1`, round-trip-tested headlessly). Viewer deliberately deferred to the pedagogy Review surface |
 
 ## 12. Decisions (resolved with user, 2026-06-09)
 
