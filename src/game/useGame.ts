@@ -1,4 +1,4 @@
-import { useEffect, useRef, useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { GameController } from './controller'
 
 /**
@@ -7,20 +7,15 @@ import { GameController } from './controller'
  * during play — components read controller fields directly).
  */
 export function useGame(): GameController {
-  const ref = useRef<GameController | null>(null)
-  if (ref.current === null) {
-    ref.current = new GameController()
-    // handy for debugging and for driving the engine from scripts/bots
-    ;(window as unknown as { __tetra: GameController }).__tetra = ref.current
-  }
-  const ctrl = ref.current
+  const [ctrl] = useState(() => new GameController())
 
   useSyncExternalStore(ctrl.subscribe, ctrl.getVersion)
 
   useEffect(() => {
+    // handy for debugging and for driving the engine from scripts/bots
+    ;(window as unknown as { __tetra: GameController }).__tetra = ctrl
     return () => {
       ctrl.destroy()
-      ref.current = null
     }
   }, [ctrl])
 

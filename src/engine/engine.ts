@@ -119,10 +119,10 @@ export class Engine {
     if (this.status !== 'playing') return
     switch (action) {
       case 'left':
-        this.tryMove(-1, 0) && this.events.push({ kind: 'move' })
+        if (this.tryMove(-1, 0)) this.events.push({ kind: 'move' })
         break
       case 'right':
-        this.tryMove(1, 0) && this.events.push({ kind: 'move' })
+        if (this.tryMove(1, 0)) this.events.push({ kind: 'move' })
         break
       case 'cw':
         this.rotate(1)
@@ -395,7 +395,7 @@ export class Engine {
     }
 
     const difficult = n === 4 || (tspin !== 'none' && n > 0)
-    let points = 0
+    let points: number
     let label: string | null = null
 
     if (tspin === 'full') {
