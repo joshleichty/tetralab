@@ -4,8 +4,16 @@ export interface Settings {
   das: number
   arr: number
   sdf: number // 41 = instant
+  /** DAS cut delay, ms (0 = off; TETR.IO defaults to ~2 frames) */
+  dcd: number
+  /** swallow hard drops briefly after a piece auto-locks */
+  safelock: boolean
+  /** red board treatment + sound when the stack nears the top */
+  danger: boolean
   ghost: boolean
   sound: boolean
+  /** SFX volume, 0–100 */
+  volume: number
   vfx: boolean
   bindings: KeyBindings
 }
@@ -14,8 +22,12 @@ export const DEFAULT_SETTINGS: Settings = {
   das: 133,
   arr: 10,
   sdf: 20,
+  dcd: 0,
+  safelock: true,
+  danger: true,
   ghost: true,
   sound: true,
+  volume: 100,
   vfx: true,
   bindings: DEFAULT_BINDINGS,
 }

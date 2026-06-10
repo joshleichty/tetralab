@@ -41,7 +41,12 @@ export type GameEvent =
   | { kind: 'rotate'; spin: boolean }
   | { kind: 'softdrop' }
   | { kind: 'harddrop'; distance: number; cells: Array<[number, number]> }
-  | { kind: 'lock'; cells: Array<[number, number]> }
+  | {
+      kind: 'lock'
+      cells: Array<[number, number]>
+      /** final placement, for finesse grading and analysis */
+      piece: { type: PieceType; rot: Rot; x: number }
+    }
   | { kind: 'clear'; info: ClearInfo }
   | { kind: 'hold' }
   | { kind: 'levelup'; level: number }

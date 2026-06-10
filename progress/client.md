@@ -131,3 +131,43 @@ version-mismatch playback refusal. 89 tests green; lint/build clean.
 
 **Open threads**: replay list/viewer UI deliberately absent. Next: M3
 handling & QoL parity.
+
+## 2026-06-09 — M3: handling & QoL parity (every §13 input/stats/audio item)
+
+**This session (runner M3)**: all remaining §13 items shipped, browser
+smoke-tested (settings modal, multi-bind, gameplay loop, results summary,
+replay persistence, resume countdown, danger state — verified live via
+`window.__tetra` in an automated Chrome session).
+
+**Input layer** (`src/input/keyboard.ts`, now DOM-free testable via
+`press`/`release`): DCD (ms slider, default 0 = Jstris feel; pauses
+auto-repeat after rotate/hard-drop, charge preserved [FAQ]) · safelock
+(default on, 100 ms hard-drop guard after auto-locks; controller detects
+"lock without harddrop event") · blur clears held keys + hidden tab
+auto-pauses · keypress + per-piece input counters.
+
+**Finesse** (`src/engine/finesse.ts`, pure): BFS optimum over (rot, x)
+using the real kick tables; placements collapsing to identical cell sets
+share optima (rotating O = wasted input). Lock event now carries
+`piece {type, rot, x}`. Faults = pieces over optimum; soft-dropped pieces
+exempt (documented). KPP/inputs from the input layer.
+
+**Controller/UI**: resume-from-pause 900 ms countdown · danger state
+(top 4 visible rows) → breathing red wash (not vfx-gated) + warning
+sound, toggleable · combo pitch-ladder, B2B accent, all-clear stinger
+sounds · SFX volume slider (0–100%) · multi-key rebind UI (chips: click
+to unbind, + to add; conflicts stolen) · end-of-game summary: inputs,
+KPP, holds, finesse faults, max combo, max B2B, clear-type breakdown ·
+marathon menu copy reflects D3.
+
+**Tests**: +19 (finesse optimums incl. ≤3-input bound over all
+placements; headless DAS/ARR/DCD/safelock/counters). 108 green;
+lint/build clean.
+
+**Open threads**: mini-TSD behavioral test still absent (M1 note) ·
+combo-break sound not added (kept the soundscape quiet; revisit at M7
+feel pass if chains feel flat).
+
+**Cross-stream flags**: `finesse.ts` is pedagogy-ready (drill grading);
+lock events now carry final placement — bot stream can consume for
+move-matching.

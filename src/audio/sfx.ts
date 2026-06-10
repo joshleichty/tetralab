@@ -19,11 +19,24 @@ type SfxName =
   | 'go'
   | 'ready'
   | 'garbage'
+  | 'combo'
+  | 'b2b'
+  | 'allclear'
+  | 'warning'
+
+const BASE_GAIN = 0.5
 
 export class Sfx {
   enabled = true
   private ctx: AudioContext | null = null
   private master: GainNode | null = null
+  private vol = 1
+
+  /** SFX volume, 0–1 (multiplies the base output level) */
+  setVolume(v: number) {
+    this.vol = Math.max(0, Math.min(1, v))
+    if (this.master) this.master.gain.value = BASE_GAIN * this.vol
+  }
 
   /** must be called from a user gesture at least once */
   ensure() {
@@ -35,11 +48,12 @@ export class Sfx {
     if (!Ctx) return
     this.ctx = new Ctx()
     this.master = this.ctx.createGain()
-    this.master.gain.value = 0.5
+    this.master.gain.value = BASE_GAIN * this.vol
     this.master.connect(this.ctx.destination)
   }
 
-  play(name: SfxName) {
+  /** `level` scales escalating sounds (combo count) */
+  play(name: SfxName, level = 0) {
     if (!this.enabled || !this.ctx || !this.master) return
     const t = this.ctx.currentTime
     switch (name) {
@@ -90,6 +104,30 @@ export class Sfx {
         break
       case 'garbage':
         this.sweep(90, 180, t, 0.12, 0.16)
+        break
+      case 'combo': {
+        // pitch ladder: two semitones per combo, capped — chains literally rise
+        const step = Math.min(level, 10)
+        const freq = 660 * Math.pow(2, (step * 2) / 12)
+        this.blip(freq, t, 0.06, 0.1, 'triangle')
+        break
+      }
+      case 'b2b':
+        // bright paired accent layered over the clear sound
+        this.blip(1174.66, t, 0.05, 0.08, 'square')
+        this.blip(1567.98, t + 0.045, 0.07, 0.08, 'square')
+        break
+      case 'allclear':
+        // the biggest positive stinger: rising arpeggio + held chord
+        this.blip(523.25, t, 0.1, 0.12, 'sine')
+        this.blip(659.25, t + 0.07, 0.1, 0.12, 'sine')
+        this.blip(783.99, t + 0.14, 0.1, 0.12, 'sine')
+        this.chord([1046.5, 1318.5, 1568], t + 0.21, 0.5, 0.1)
+        break
+      case 'warning':
+        // low double pulse on entering danger
+        this.sweep(220, 130, t, 0.18, 0.14)
+        this.sweep(220, 130, t + 0.22, 0.18, 0.12)
         break
     }
   }

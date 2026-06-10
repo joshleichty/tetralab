@@ -5,7 +5,7 @@ import type { BestRecords } from '../game/settings'
 import { formatTime } from '../game/useGame'
 
 const MODES: Array<{ mode: Mode; name: string; desc: string }> = [
-  { mode: 'marathon', name: 'marathon', desc: 'endless · gravity rises every 10 lines' },
+  { mode: 'marathon', name: 'marathon', desc: '150 lines · gravity rises every 10' },
   { mode: 'sprint', name: '40 lines', desc: 'clear 40 lines as fast as you can' },
   { mode: 'blitz', name: 'blitz', desc: 'two minutes · highest score wins' },
 ]
@@ -157,6 +157,16 @@ export function ResultsOverlay({ ctrl }: { ctrl: GameController }) {
           ? formatTime(r.timeMs)
           : r.score.toLocaleString()
         : 'top out'
+  const d = r.detail
+  const breakdown: string[] = []
+  const clearNames = ['single', 'double', 'triple', 'quad']
+  d.clears.forEach((n, i) => {
+    if (n > 0) breakdown.push(`${clearNames[i]} ×${n}`)
+  })
+  for (const [label, n] of Object.entries(d.spins)) {
+    breakdown.push(`${label.toLowerCase()} ×${n}`)
+  }
+  if (d.perfectClears > 0) breakdown.push(`perfect clear ×${d.perfectClears}`)
   const subtitle =
     r.mode === 'survival'
       ? 'survived'
@@ -203,7 +213,36 @@ export function ResultsOverlay({ ctrl }: { ctrl: GameController }) {
             <dd>{r.level}</dd>
           </div>
         )}
+        <div>
+          <dt>inputs</dt>
+          <dd>{d.inputs}</dd>
+        </div>
+        <div>
+          <dt>kpp</dt>
+          <dd>{d.kpp.toFixed(2)}</dd>
+        </div>
+        <div>
+          <dt>holds</dt>
+          <dd>{d.holds}</dd>
+        </div>
+        <div>
+          <dt>finesse faults</dt>
+          <dd>{d.finesseFaults}</dd>
+        </div>
+        {d.maxCombo > 0 && (
+          <div>
+            <dt>max combo</dt>
+            <dd>{d.maxCombo}</dd>
+          </div>
+        )}
+        {d.maxB2B > 0 && (
+          <div>
+            <dt>max b2b</dt>
+            <dd>{d.maxB2B}</dd>
+          </div>
+        )}
       </dl>
+      {breakdown.length > 0 && <p className="result-breakdown">{breakdown.join(' · ')}</p>}
 
       <div className="overlay-actions">
         <button className="solid-btn" onClick={() => ctrl.start(ctrl.mode)}>

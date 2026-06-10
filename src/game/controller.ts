@@ -1,4 +1,6 @@
 import { Engine } from '../engine/engine'
+import { optimalInputs } from '../engine/finesse'
+import { VISIBLE_START } from '../engine/pieces'
 import { ReplayRecorder, STEP_MS } from '../engine/replay'
 import { saveReplay } from './replays'
 import type { Action, Mode } from '../engine/types'
@@ -35,9 +37,46 @@ export interface GameResult {
   isPersonalBest: boolean
   /** cheese mode: race size (10/18/100) */
   cheeseTotal?: number
+  /** end-of-game summary depth (docs/parity.md §8) */
+  detail: GameDetail
+}
+
+export interface GameDetail {
+  /** total gameplay keypresses */
+  inputs: number
+  /** keys per piece */
+  kpp: number
+  holds: number
+  maxCombo: number
+  maxB2B: number
+  /** pieces placed with more inputs than the finesse optimum [HD-Finesse] */
+  finesseFaults: number
+  /** plain clears by size, 1–4 */
+  clears: [number, number, number, number]
+  /** T-spin/mini clears by engine label, e.g. "T-SPIN DOUBLE" */
+  spins: Record<string, number>
+  perfectClears: number
+}
+
+function emptyDetail(): GameDetail {
+  return {
+    inputs: 0,
+    kpp: 0,
+    holds: 0,
+    maxCombo: 0,
+    maxB2B: 0,
+    finesseFaults: 0,
+    clears: [0, 0, 0, 0],
+    spins: {},
+    perfectClears: 0,
+  }
 }
 
 const COUNTDOWN_MS = 1400
+const RESUME_COUNTDOWN_MS = 900
+const SAFELOCK_MS = 100
+/** stack within this many rows of the visible top ⇒ danger */
+const DANGER_ROWS = 4
 const BLITZ_MS = 120_000
 const MAX_FRAME_MS = 100
 
@@ -58,6 +97,9 @@ export class GameController {
   /** fixed-step index since game start; the replay/netcode time base */
   private step = 0
   private stepAcc = 0
+  private detail = emptyDetail()
+  /** true while the stack is in the danger zone (drives tint + warning) */
+  danger = false
   private fx: BoardFx = emptyFx()
   private boardRenderer: BoardRenderer | null = null
   private holdRenderer: PreviewRenderer | null = null
@@ -72,7 +114,7 @@ export class GameController {
     this.settings = loadSettings()
     this.best = loadBest()
     this.input = new InputHandler(
-      { das: this.settings.das, arr: this.settings.arr },
+      { das: this.settings.das, arr: this.settings.arr, dcd: this.settings.dcd },
       this.settings.bindings,
     )
     this.input.dispatch = (a) => this.applyAction(a)
@@ -81,15 +123,30 @@ export class GameController {
       if (this.phase !== 'menu') this.start(this.mode)
     }
     this.input.attach(window)
+    window.addEventListener('blur', this.onBlur)
+    document.addEventListener('visibilitychange', this.onVisibility)
     this.lastT = performance.now()
     this.raf = requestAnimationFrame(this.frame)
     sfx.enabled = this.settings.sound
+    sfx.setVolume(this.settings.volume / 100)
   }
 
   destroy() {
     this.destroyed = true
     cancelAnimationFrame(this.raf)
     this.input.detach(window)
+    window.removeEventListener('blur', this.onBlur)
+    document.removeEventListener('visibilitychange', this.onVisibility)
+  }
+
+  /** stuck-input protection: alt-tab mid-DAS must not leave keys held */
+  private onBlur = () => {
+    this.input.reset()
+  }
+
+  /** background tab: auto-pause rather than letting pieces fall blind */
+  private onVisibility = () => {
+    if (document.hidden && this.phase === 'playing') this.togglePause()
   }
 
   // ── React bridge ───────────────────────────────────────────────
@@ -152,12 +209,15 @@ export class GameController {
     this.recorder = new ReplayRecorder(this.engine.cfg)
     this.step = 0
     this.stepAcc = 0
+    this.detail = emptyDetail()
+    this.danger = false
     this.result = null
     this.actionLabel = null
     this.fx = emptyFx()
     this.phase = 'countdown'
     this.countdownLeft = COUNTDOWN_MS
     this.input.reset()
+    this.input.resetCounters()
     this.input.enabled = false
     sfx.play('ready')
     this.emit()
@@ -168,8 +228,13 @@ export class GameController {
       this.phase = 'paused'
       this.emit()
     } else if (this.phase === 'paused') {
-      this.phase = 'playing'
+      // graceful resume: a short countdown instead of dropping the player
+      // back mid-air (docs/parity.md §7)
+      this.phase = 'countdown'
+      this.countdownLeft = RESUME_COUNTDOWN_MS
+      this.input.enabled = false
       this.lastT = performance.now()
+      sfx.play('ready')
       this.emit()
     } else if (this.phase === 'over' || this.phase === 'menu') {
       this.quitToMenu()
@@ -187,9 +252,14 @@ export class GameController {
   updateSettings(patch: Partial<Settings>) {
     this.settings = { ...this.settings, ...patch }
     saveSettings(this.settings)
-    this.input.handling = { das: this.settings.das, arr: this.settings.arr }
+    this.input.handling = {
+      das: this.settings.das,
+      arr: this.settings.arr,
+      dcd: this.settings.dcd,
+    }
     this.input.bindings = this.settings.bindings
     sfx.enabled = this.settings.sound
+    sfx.setVolume(this.settings.volume / 100)
     if (this.engine && this.engine.cfg.sdf !== this.settings.sdf) {
       this.engine.cfg.sdf = this.settings.sdf
       this.recorder?.recordSdf(this.step, this.settings.sdf)
@@ -197,13 +267,19 @@ export class GameController {
     this.emit()
   }
 
-  rebind(action: BindableAction, code: string) {
+  /** bind an additional key to an action (stealing it from any other action) */
+  addBind(action: BindableAction, code: string) {
     const bindings = { ...this.settings.bindings }
-    // remove the code from every other action to avoid double-binding
     for (const key of Object.keys(bindings) as BindableAction[]) {
       bindings[key] = bindings[key].filter((c) => c !== code)
     }
-    bindings[action] = [code]
+    bindings[action] = [...bindings[action], code]
+    this.updateSettings({ bindings })
+  }
+
+  removeBind(action: BindableAction, code: string) {
+    const bindings = { ...this.settings.bindings }
+    bindings[action] = bindings[action].filter((c) => c !== code)
     this.updateSettings({ bindings })
   }
 
@@ -242,6 +318,7 @@ export class GameController {
         }
       }
       this.drainEvents(t)
+      this.updateDanger()
       this.emit()
     }
 
@@ -249,8 +326,23 @@ export class GameController {
     this.raf = requestAnimationFrame(this.frame)
   }
 
+  /** danger when the stack reaches the top rows of the visible field */
+  private updateDanger() {
+    const e = this.engine
+    let inDanger = false
+    if (e && e.status === 'playing') {
+      const limit = (VISIBLE_START + DANGER_ROWS) * 10
+      for (let i = 0; i < limit && !inDanger; i++) {
+        if (e.board[i] !== 0) inDanger = true
+      }
+    }
+    if (inDanger && !this.danger && this.settings.danger) sfx.play('warning')
+    this.danger = inDanger
+  }
+
   private drainEvents(now: number) {
     const engine = this.engine!
+    let prevKind = ''
     for (const ev of engine.takeEvents()) {
       switch (ev.kind) {
         case 'move':
@@ -264,18 +356,43 @@ export class GameController {
           this.fx.drops.push({ cells: ev.cells, distance: ev.distance, t: now })
           this.fx.shakeT = now
           break
-        case 'lock':
+        case 'lock': {
           sfx.play('lock')
           this.fx.locks.push({ cells: ev.cells, t: now })
+          // safelock: a piece that locked on its own arms a brief hard-drop
+          // guard so a queued-up drop doesn't slam the next piece [TIO]
+          if (prevKind !== 'harddrop' && this.settings.safelock) {
+            this.input.safelockMs = SAFELOCK_MS
+          }
+          const { moves, usedSoftDrop } = this.input.takePieceInputs()
+          const { type, rot, x } = ev.piece
+          if (!usedSoftDrop && moves > optimalInputs(type, rot, x)) {
+            this.detail.finesseFaults++
+          }
           break
+        }
         case 'hold':
           sfx.play('hold')
+          this.detail.holds++
+          this.input.takePieceInputs() // inputs spent pre-hold aren't the next piece's
           break
         case 'clear': {
           const { info } = ev
           if (info.lines > 0) {
-            sfx.play(info.lines === 4 || info.label ? 'quad' : 'clear')
+            sfx.play(info.perfectClear ? 'allclear' : info.lines === 4 || info.label ? 'quad' : 'clear')
+            if (info.b2b) sfx.play('b2b')
+            if (info.combo > 0) sfx.play('combo', info.combo)
             this.fx.clears.push({ rows: info.rows, flash: info.lines === 4 || !!info.label, t: now })
+            if (info.label && info.label !== 'QUAD') {
+              this.detail.spins[info.label] = (this.detail.spins[info.label] ?? 0) + 1
+            } else {
+              this.detail.clears[info.lines - 1]++
+            }
+            if (info.perfectClear) this.detail.perfectClears++
+            this.detail.maxCombo = Math.max(this.detail.maxCombo, info.combo)
+            this.detail.maxB2B = Math.max(this.detail.maxB2B, engine.b2b)
+          } else if (info.label) {
+            this.detail.spins[info.label] = (this.detail.spins[info.label] ?? 0) + 1
           }
           const sub: string[] = []
           if (info.b2b) sub.push('BACK-TO-BACK')
@@ -304,6 +421,7 @@ export class GameController {
         case 'softdrop':
           break
       }
+      prevKind = ev.kind
     }
   }
 
@@ -359,6 +477,11 @@ export class GameController {
       pps,
       isPersonalBest,
       cheeseTotal: this.mode === 'cheese' ? this.cheeseTotal : undefined,
+      detail: {
+        ...this.detail,
+        inputs: this.input.keypresses,
+        kpp: e.piecesPlaced > 0 ? this.input.keypresses / e.piecesPlaced : 0,
+      },
     }
     this.phase = 'over'
   }
@@ -370,6 +493,7 @@ export class GameController {
       now,
       this.settings.ghost,
       this.settings.vfx,
+      this.danger && this.settings.danger,
     )
     this.holdRenderer?.draw([this.engine?.hold ?? null], {
       dimFirst: this.engine?.holdUsed ?? false,

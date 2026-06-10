@@ -97,9 +97,9 @@ from tetr.io source).
 | DAS, ms-based, settable | ✓ | baseline | Default 133 ms = Jstris default [JS]; TETR.IO 10f ≈ 167 ms [TIO] |
 | ARR, ms-based, 0 = instant | ✓ | baseline | [FAQ] "0 = instantaneous". Instant impl = 10 dispatches (board width) — OK |
 | SDF slider 5–41, 41 = ∞ | ✓ | baseline | Range exactly matches [TIO] (5–41, 41 renders ∞) |
-| DCD (DAS cut delay) | ✗ | baseline | [TIO] **default 2 frames ≠ 0** — every TETR.IO player has it; pauses DAS after rotate/spawn, prevents 0-ARR misdrops [FAQ]. Tetra has none |
+| DCD (DAS cut delay) | ✓ | baseline | Added in M3: ms slider (default 0 = Jstris feel); pauses auto-repeat after rotate/hard-drop per [FAQ], charge preserved |
 | Cancel-DAS-on-direction-change toggle | ✗ | nice | Tetra hardcodes preserve-charge (Jstris style) = TETR.IO's default-off behavior anyway [TIO]; the toggle itself is nice |
-| Safelock ("prevent accidental hard drops") | ✗ | baseline | [TIO] default **on**: hard-drop key dead for a few frames after a piece locks on its own. Pure anti-jank — exactly our bar |
+| Safelock ("prevent accidental hard drops") | ✓ | baseline | Added in M3, default on: hard drop swallowed 100 ms after a piece locks on its own [TIO] |
 | Prefer-soft-drop-over-movement (20G) | ✗ | nice | [TIO] default on; only matters at very high gravity |
 | IRS / IHS (initial rotation/hold) | ✗ | nice | [TIO] tap default; nearly moot at 0 ARE |
 | DAS charges during countdown | ✓ | baseline | Tetra has it; matches competitive expectation |
@@ -111,7 +111,7 @@ from tetr.io source).
 | --- | --- | --- | --- |
 | Default scheme (arrows + Z/X + A 180 + C/Shift hold + Space) | ✓ | baseline | Matches TETR.IO guideline scheme [LQ][TIO] minus numpad/Ctrl alternates (nice) |
 | Full rebinding of all 10 actions | ✓ | baseline | Settings modal |
-| Multiple keys per action | △ | baseline | Data model supports arrays (defaults use them); **rebind UI collapses to one key**. TETR.IO players expect multi-bind [TIO] |
+| Multiple keys per action | ✓ | baseline | Fixed in M3: chip-based rebind UI — click a key to unbind, + adds another; conflicts stolen across actions |
 | Dedicated instant restart (tap R) | ✓ | baseline | Tetra = tap (TETR.IO stride behavior; default TETR.IO is hold-R ~15f). Tap is the better behavior for a trainer — intentional |
 | Hold-to-forfeit / quit | ✓ | baseline | Esc → pause → quit covers it for solo |
 | Gamepad | ✗ | out | [TIO] has it; not tetra baseline → IDEAS.md |
@@ -122,11 +122,11 @@ from tetr.io source).
 | --- | --- | --- | --- |
 | Instant retry mid-game | ✓ | baseline | R restarts with fresh seed |
 | Start countdown | ✓ | baseline | 1400 ms; TETR.IO solo ≈3 s, stride 500 ms [TIO]. Consider shorter on retry (polish) |
-| Resume-from-pause countdown / input grace | ✗ | baseline | Tetra resumes instantly mid-air — jank by our bar. (TETR.IO sidesteps: no solo pause. Tetra keeps pause — it's a trainer — so resume must be graceful) |
+| Resume-from-pause countdown / input grace | ✓ | baseline | Added in M3: 900 ms ready/go countdown on unpause, inputs gated (DAS still pre-charges) |
 | Action text (clear label, B2B, combo, PC) | ✓ | baseline | Engine labels + controller captions. ALL/SOME/OFF setting = nice [TIO] |
 | Ghost piece + toggle | ✓ | baseline | Opacity slider = nice [TIO 0.15 default] |
-| Danger warning (board state + sound when near top-out) | ✗ | baseline | [TIO] default on. Matters most in survival/cheese/battle — land with Phase 3 |
-| Stuck-input protection on focus loss (blur clears held keys) | ✗ | baseline | Alt-tab mid-DAS leaves keys in `held` set → stuck autorepeat = jank. Audit finding, no source needed |
+| Danger warning (board state + sound when near top-out) | ✓ | baseline | Added in M3, toggleable: breathing red wash + warning sound when the stack reaches the top 4 visible rows |
+| Stuck-input protection on focus loss (blur clears held keys) | ✓ | baseline | Fixed in M3: window blur resets held keys/DAS; hidden tab auto-pauses (quality-bar §5.5) |
 | Undo/redo (zen-style practice) | ✗ | out→pedagogy | [TIO] ZEN has it; belongs to pedagogy-stream mode design |
 | Settings persistence (localStorage) | ✓ | baseline | `tetra.settings.v1` |
 | Settings export/import file | ✗ | nice | [TIO] `.ttc` drag-drop |
@@ -138,8 +138,8 @@ from tetr.io source).
 | Live: time, lines, PPS, score, level (per-mode layouts) | ✓ | baseline | `StatsPanel` |
 | Live APM / attack stats | ✗ | baseline (Phase 2+) | Needs attack to exist; nearly free after `AttackConfig` [WN][JS] |
 | VS score | ✗ | baseline (Phase 2+) | `((sent+garbage cleared)/pieces)×PPS×100` [tetrio.team2xh.net] |
-| Finesse faults + KPP + input counter (Pro-mode-style, optional) | ✗ | baseline | [TIO] 40L Pro mode; [JS] shows finesse/KPP. Input layer work; finesse-fault definition from [HD-Finesse] |
-| End-of-game summary depth | △ | baseline | Tetra: score/lines/level/time/pieces/PPS/PB. Baseline adds: inputs, KPP, holds, clear-type breakdown (incl. T-spin variants), max combo, max B2B [TIO summary labels]. Full TETR.IO list is `nice` |
+| Finesse faults + KPP + input counter (Pro-mode-style, optional) | ✓ | baseline | Added in M3: `src/engine/finesse.ts` BFS optimum table ([HD-Finesse], real kick tables); faults/KPP/inputs in the results summary. Soft-dropped pieces exempt (documented) |
+| End-of-game summary depth | ✓ | baseline | Fixed in M3: adds inputs, KPP, holds, finesse faults, max combo, max B2B, clear-type breakdown incl. T-spin variants + PCs |
 | Per-mode PBs | ✓ | baseline | sprint/blitz/marathon/cheese-by-size/survival; PB flag in results |
 | PB celebration (sound/visual) | ✗ | nice | [TIO] `personalbest`/`worldrecord` events |
 | Stat-slot customization | ✗ | nice | [TIO] 5 configurable slots |
@@ -150,12 +150,12 @@ from tetr.io source).
 | Row | Status | Grade | Notes |
 | --- | --- | --- | --- |
 | Core SFX: move/rotate/spin/drops/lock/hold/clear/quad/garbage/level/over/win/ready-go | ✓ | baseline | Synthesized WebAudio, matches tetra aesthetic |
-| Combo escalation (tiered combo sounds + combo break) | ✗ | baseline | [TIO] `combo_1..16`, `combobreak` — core feel of chains |
-| B2B clear sound (+ B2B break) | ✗ | baseline | [TIO] `clearbtb`, `btb_break` |
-| All-clear (PC) distinct sound | ✗ | baseline | [TIO] `allclear` |
-| Top-out danger siren | ✗ | baseline | [TIO] `warning` — pairs with danger-warning row |
+| Combo escalation (tiered combo sounds) | ✓ | baseline | Added in M3: pitch ladder rising 2 semitones per combo, capped |
+| B2B clear sound | ✓ | baseline | Added in M3: paired bright accent layered over the clear |
+| All-clear (PC) distinct sound | ✓ | baseline | Added in M3: rising arpeggio + chord stinger |
+| Top-out danger siren | ✓ | baseline | Added in M3: low double pulse on entering danger |
 | Finesse-fault sound | ✗ | nice | With finesse feature [TIO 40L] |
-| Volume slider (not just on/off) | ✗ | baseline | [TIO] master/SFX/music sliders; tetra has a single toggle |
+| Volume slider (not just on/off) | ✓ | baseline | Added in M3: 0–100% SFX volume + mute toggle |
 | Music | ✗ | DECIDE | [TIO] full BGM system; Jstris none by default. Decision D4 |
 
 ## 10. Visual
@@ -164,7 +164,7 @@ from tetr.io source).
 | --- | --- | --- | --- |
 | Grid | ✓ | baseline | Opacity setting = nice [TIO 0.1] |
 | Clear/drop/lock effects + screen shake, toggleable | ✓ | baseline | `vfx` toggle |
-| Danger-state board treatment | ✗ | baseline | Pairs with §7 danger warning [TIO red board] |
+| Danger-state board treatment | ✓ | baseline | Added in M3: quiet breathing red wash (data-bearing — not vfx-gated), shares the §7 toggle |
 | Board/background opacity, particles slider, zoom | ✗ | nice | [TIO] |
 | Block skins | ✗ | out | Tetra has its own design language |
 | Side-by-side duel view | ✗ | baseline (Phase 3/4) | Battle/online surfaces |

@@ -76,7 +76,14 @@ export class BoardRenderer {
     this.ctx.scale(dpr, dpr)
   }
 
-  draw(engine: Engine | null, fx: BoardFx, now: number, showGhost: boolean, vfx: boolean) {
+  draw(
+    engine: Engine | null,
+    fx: BoardFx,
+    now: number,
+    showGhost: boolean,
+    vfx: boolean,
+    danger = false,
+  ) {
     const ctx = this.ctx
     ctx.clearRect(0, 0, BOARD_PX_W, BOARD_PX_H)
 
@@ -97,6 +104,12 @@ export class BoardRenderer {
         this.drawActive(ctx, engine)
       }
       if (vfx) this.drawFx(ctx, fx, now)
+      // danger: a quiet breathing red wash — data-bearing, so not vfx-gated
+      if (danger) {
+        const pulse = 0.05 + 0.03 * (0.5 + 0.5 * Math.sin(now / 260))
+        ctx.fillStyle = `rgba(224, 110, 115, ${pulse})`
+        ctx.fillRect(0, 0, BOARD_PX_W, BOARD_PX_H)
+      }
     }
     ctx.restore()
   }

@@ -646,11 +646,28 @@ input[type='range']::-moz-range-thumb {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   padding: 9px 0;
   font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-dim);
+}
+
+.toggle-row > span:first-child {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 1px;
+}
+
+.toggle-row em {
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--ink-faint);
 }
 
 .toggle-row.on {
@@ -710,25 +727,74 @@ input[type='range']::-moz-range-thumb {
   border-color: var(--line);
 }
 
-.bind-row.rebinding {
-  border-color: var(--accent);
-  color: var(--accent);
+.bind-hint {
+  margin: 0 0 8px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
 }
 
-.bind-row kbd {
+.bind-keys {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.bind-key {
+  font-size: 11px;
+  color: var(--ink-dim);
+  text-transform: none;
+  padding: 2px 7px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 120ms, color 120ms;
+}
+
+.bind-key:hover {
+  color: var(--danger, #e06e73);
+  border-color: var(--danger, #e06e73);
+  text-decoration: line-through;
+}
+
+.bind-add {
   font-size: 11px;
   color: var(--ink-faint);
-  text-transform: none;
+  padding: 2px 7px;
+  border: 1px dashed var(--line);
+  border-radius: 4px;
+  cursor: pointer;
+  background: none;
+  transition: border-color 120ms, color 120ms;
 }
 
-.bind-row.rebinding kbd {
+.bind-add:hover {
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+
+.bind-add.rebinding {
   color: var(--accent);
+  border-color: var(--accent);
 }
 
 .reset-binds {
   margin-top: 10px;
   align-self: flex-start;
   padding-left: 0;
+}
+
+.result-breakdown {
+  margin: 10px 0 0;
+  max-width: 88%;
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.9;
+  color: var(--ink-faint);
 }
 
 /* ── responsive ───────────────────────────────────────────────── */

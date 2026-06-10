@@ -14,6 +14,8 @@ substrate for the RL training mode.
 - `types.ts` — `Action`, `EngineConfig`, `GameEvent`, `ClearInfo`, cell constants
 - `pieces.ts` — piece shapes/spawns; `srs.ts` — SRS+ kick tables (D1)
 - `rng.ts` — seeded RNG (7-bag)
+- `finesse.ts` — finesse optimum table ([HD-Finesse]): BFS over (rot, x)
+  with the real kick tables; `optimalInputs(type, rot, x)`
 - `replay.ts` — replay recording/playback (D5): `STEP_MS` fixed-step grid,
   `ReplayRecorder`, `simulateReplay`; versioned via `REPLAY_VERSION` —
   **bump it on any state-visible rule change**

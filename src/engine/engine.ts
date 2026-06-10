@@ -321,7 +321,7 @@ export class Engine {
       if (y >= VISIBLE_START) allAboveVisible = false
     }
     this.piecesPlaced++
-    this.events.push({ kind: 'lock', cells })
+    this.events.push({ kind: 'lock', cells, piece: { type: p.type, rot: p.rot, x: p.x } })
 
     if (allAboveVisible) {
       this.gameOver()

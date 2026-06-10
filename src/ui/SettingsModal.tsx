@@ -48,7 +48,7 @@ export function SettingsModal({ ctrl, onClose }: { ctrl: GameController; onClose
     const onKey = (e: KeyboardEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      if (e.code !== 'Escape') ctrl.rebind(rebinding, e.code)
+      if (e.code !== 'Escape') ctrl.addBind(rebinding, e.code)
       setRebinding(null)
     }
     window.addEventListener('keydown', onKey, { capture: true })
@@ -109,31 +109,74 @@ export function SettingsModal({ ctrl, onClose }: { ctrl: GameController; onClose
             display={s.sdf >= INSTANT_SDF ? '∞' : `${s.sdf}×`}
             onChange={(sdf) => ctrl.updateSettings({ sdf })}
           />
+          <Slider
+            label="dcd"
+            hint="das cut delay · pauses auto-repeat after rotate/drop"
+            value={s.dcd}
+            min={0}
+            max={100}
+            step={1}
+            unit="ms"
+            display={s.dcd === 0 ? 'off' : `${s.dcd}ms`}
+            onChange={(dcd) => ctrl.updateSettings({ dcd })}
+          />
+          <Toggle
+            label="safe lock"
+            hint="brief hard-drop guard after a piece locks on its own"
+            value={s.safelock}
+            onChange={(safelock) => ctrl.updateSettings({ safelock })}
+          />
         </section>
 
         <section>
           <h3>game</h3>
           <Toggle label="ghost piece" value={s.ghost} onChange={(ghost) => ctrl.updateSettings({ ghost })} />
-          <Toggle label="sound" value={s.sound} onChange={(sound) => ctrl.updateSettings({ sound })} />
+          <Toggle
+            label="danger warning"
+            hint="red board + sound when the stack nears the top"
+            value={s.danger}
+            onChange={(danger) => ctrl.updateSettings({ danger })}
+          />
           <Toggle label="visual effects" value={s.vfx} onChange={(vfx) => ctrl.updateSettings({ vfx })} />
+          <Toggle label="sound" value={s.sound} onChange={(sound) => ctrl.updateSettings({ sound })} />
+          <Slider
+            label="volume"
+            hint="sfx level"
+            value={s.volume}
+            min={0}
+            max={100}
+            step={1}
+            unit="%"
+            onChange={(volume) => ctrl.updateSettings({ volume })}
+          />
         </section>
 
         <section>
           <h3>keys</h3>
+          <p className="bind-hint">click a key to unbind it · + adds another key</p>
           <div className="bind-grid">
             {BIND_ROWS.map(({ action, label }) => (
-              <button
-                key={action}
-                className={`bind-row${rebinding === action ? ' rebinding' : ''}`}
-                onClick={() => setRebinding(action)}
-              >
+              <div key={action} className="bind-row">
                 <span>{label}</span>
-                <kbd>
-                  {rebinding === action
-                    ? 'press a key…'
-                    : ctrl.settings.bindings[action].map(prettyKey).join(' / ')}
-                </kbd>
-              </button>
+                <span className="bind-keys">
+                  {ctrl.settings.bindings[action].map((code) => (
+                    <kbd
+                      key={code}
+                      className="bind-key"
+                      title="unbind"
+                      onClick={() => ctrl.removeBind(action, code)}
+                    >
+                      {prettyKey(code)}
+                    </kbd>
+                  ))}
+                  <button
+                    className={`bind-add${rebinding === action ? ' rebinding' : ''}`}
+                    onClick={() => setRebinding(rebinding === action ? null : action)}
+                  >
+                    {rebinding === action ? 'press a key…' : '+'}
+                  </button>
+                </span>
+              </div>
             ))}
           </div>
           <button
@@ -190,16 +233,21 @@ function Slider({
 
 function Toggle({
   label,
+  hint,
   value,
   onChange,
 }: {
   label: string
+  hint?: string
   value: boolean
   onChange: (v: boolean) => void
 }) {
   return (
     <button className={`toggle-row${value ? ' on' : ''}`} onClick={() => onChange(!value)}>
-      <span>{label}</span>
+      <span>
+        {label}
+        {hint && <em>{hint}</em>}
+      </span>
       <span className="toggle-pill" aria-hidden>
         <span className="toggle-dot" />
       </span>
