@@ -254,6 +254,113 @@ describe('Top out', () => {
   })
 })
 
+describe('Cheese mode', () => {
+  function newCheese(total = 18, seed = 5) {
+    const e = new Engine({ seed, mode: 'cheese', cheeseTotal: total })
+    e.start()
+    return e
+  }
+
+  it('starts with cheeseHeight rows on the board and the rest pooled', () => {
+    const e = newCheese(18)
+    expect(e.cheeseRows()).toBe(9)
+    expect(e.cheesePool).toBe(9)
+    expect(e.cheeseLeft()).toBe(18)
+  })
+
+  it('small races start with the whole pool on the board', () => {
+    const e = newCheese(5)
+    expect(e.cheeseRows()).toBe(5)
+    expect(e.cheesePool).toBe(0)
+  })
+
+  it('every cheese row has exactly one hole, never matching the row below', () => {
+    const e = newCheese(18)
+    let prevHole = -1
+    for (let y = BOARD_H - 1; y >= BOARD_H - 9; y--) {
+      const holes: number[] = []
+      for (let x = 0; x < BOARD_W; x++) {
+        if (e.board[y * BOARD_W + x] === 0) holes.push(x)
+      }
+      expect(holes.length).toBe(1)
+      expect(holes[0]).not.toBe(prevHole)
+      prevHole = holes[0]
+    }
+  })
+
+  it('refills cheese from the pool after digging', () => {
+    const e = newCheese(18)
+    // clear the bottom cheese row: find its hole and fill it with a vertical I
+    const bottom = BOARD_H - 1
+    let hole = 0
+    for (let x = 0; x < BOARD_W; x++) {
+      if (e.board[bottom * BOARD_W + x] === 0) hole = x
+    }
+    // carve a clean shaft above the hole so the I can reach it
+    for (let y = BOARD_H - 9; y < bottom; y++) e.board[y * BOARD_W + hole] = 0
+    e.active!.type = 'I'
+    e.active!.rot = 1
+    e.active!.x = hole - 2
+    e.applyAction('hardDrop')
+    expect(e.lines).toBe(1)
+    // one row dug, pool refills the board back up to 9
+    expect(e.cheeseRows()).toBe(9)
+    expect(e.cheesePool).toBe(8)
+    expect(e.cheeseLeft()).toBe(17)
+  })
+
+  it('wins when all cheese is dug', () => {
+    const e = newCheese(1, 11)
+    const bottom = BOARD_H - 1
+    let hole = 0
+    for (let x = 0; x < BOARD_W; x++) {
+      if (e.board[bottom * BOARD_W + x] === 0) hole = x
+    }
+    e.active!.type = 'I'
+    e.active!.rot = 1
+    e.active!.x = hole - 2
+    e.applyAction('hardDrop')
+    expect(e.cheeseLeft()).toBe(0)
+    expect(e.status).toBe('won')
+  })
+})
+
+describe('Survival mode', () => {
+  it('garbage rises on a timer', () => {
+    const e = new Engine({ seed: 3, mode: 'survival', riseStartMs: 1000 })
+    e.start()
+    expect(e.cheeseRows()).toBe(0)
+    e.tick(999)
+    expect(e.cheeseRows()).toBe(0)
+    e.tick(2)
+    expect(e.cheeseRows()).toBe(1)
+  })
+
+  it('rise interval accelerates down to the floor', () => {
+    const e = new Engine({
+      seed: 3,
+      mode: 'survival',
+      riseStartMs: 1000,
+      riseDecayMs: 400,
+      riseMinMs: 500,
+    })
+    e.start()
+    e.tick(1001) // first rise; interval 1000 -> 600
+    expect(e.cheeseRows()).toBe(1)
+    e.tick(601) // second rise; interval 600 -> 500 (floor)
+    expect(e.cheeseRows()).toBe(2)
+    e.tick(501)
+    expect(e.cheeseRows()).toBe(3)
+  })
+
+  it('tops out when garbage buries the spawn zone', () => {
+    const e = new Engine({ seed: 3, mode: 'survival', riseStartMs: 10, riseMinMs: 10 })
+    e.start()
+    for (let i = 0; i < 50 && e.status === 'playing'; i++) e.tick(20)
+    expect(e.status).toBe('over')
+  })
+})
+
 describe('Sprint mode', () => {
   it('wins at 40 lines', () => {
     const e = new Engine({ seed: 9, mode: 'sprint' })

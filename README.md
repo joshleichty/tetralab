@@ -23,7 +23,11 @@ npm run build    # typecheck + production build
 - **Scoring**: T-spins (3-corner rule with mini/full distinction), back-to-back,
   combos, perfect clears, guideline level gravity curve
 - **Modes**: marathon (endless), 40 lines (sprint), blitz (2 min score attack)
-- Personal bests persisted per mode
+- **Training modes**:
+  - *cheese* — dig race through 10 / 18 / 100 lines of cheese (single-hole garbage,
+    adjacent holes never align, board holds up to 9 cheese rows and refills as you dig)
+  - *survival* — garbage rises on a timer (6 s, accelerating to 1.8 s); outlast it
+- Personal bests persisted per mode (and per cheese race size)
 
 ## Handling
 
@@ -62,9 +66,10 @@ The engine is driven entirely through `applyAction(action)` + `tick(dtMs)` and r
 back through an event queue — the keyboard, a replay file, or an RL agent are
 interchangeable drivers. `window.__tetra` exposes the live controller for scripting.
 
-### Training-mode hooks (planned)
+### Garbage / training internals
 
-- `Engine.addGarbage(rows, holeColumn)` — garbage/downstack drills already supported
-- Seeded engines make episodes reproducible
-- The `Action` type is the agent's exact action space; the board is a flat `Uint8Array`
-  observation
+- `Engine.insertCheese(rows)` — seeded cheese rows, adjacent holes never repeat
+- `Engine.addGarbage(rows, holeColumn)` — clean-well garbage for scripted drills
+- `Engine.cheeseLeft()` / `cheesePool` / `riseTimer` — race + rise state for HUDs and bots
+- Seeded engines make episodes reproducible; the `Action` type is the agent's exact
+  action space and the board is a flat `Uint8Array` observation (future RL bot)

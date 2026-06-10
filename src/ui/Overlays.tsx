@@ -148,16 +148,31 @@ export function ResultsOverlay({ ctrl }: { ctrl: GameController }) {
   const r = ctrl.result
   if (!r) return null
 
-  const title = r.won ? (r.mode === 'sprint' ? formatTime(r.timeMs) : r.score.toLocaleString()) : 'top out'
-  const subtitle = r.won
-    ? r.mode === 'sprint'
-      ? '40 lines cleared'
-      : r.mode === 'blitz'
-        ? 'time'
-        : 'final score'
-    : ctrl.mode === 'sprint'
-      ? `${r.lines} / 40 lines`
-      : `score ${r.score.toLocaleString()}`
+  const timed = r.mode === 'sprint' || r.mode === 'cheese' || r.mode === 'survival'
+  const title =
+    r.mode === 'survival'
+      ? formatTime(r.timeMs)
+      : r.won
+        ? timed
+          ? formatTime(r.timeMs)
+          : r.score.toLocaleString()
+        : 'top out'
+  const subtitle =
+    r.mode === 'survival'
+      ? 'survived'
+      : r.won
+        ? r.mode === 'sprint'
+          ? '40 lines cleared'
+          : r.mode === 'cheese'
+            ? `${r.cheeseTotal} lines of cheese, dug`
+            : r.mode === 'blitz'
+              ? 'final score'
+              : 'final score'
+        : r.mode === 'sprint'
+          ? `${r.lines} / 40 lines`
+          : r.mode === 'cheese'
+            ? `${r.lines} lines dug`
+            : `score ${r.score.toLocaleString()}`
 
   return (
     <div className="overlay dim results">
