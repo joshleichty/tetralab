@@ -27,6 +27,12 @@ your work.
 ## Rules
 - `src/engine/` stays pure and headless: no DOM, no React, seeded RNG only.
   It is the substrate for the future RL training mode.
+- **Deterministically drivable at every layer**: injectable time everywhere
+  (no layer reads wall-clock directly); state-based assertions, never
+  pixels; online play goes through a `Transport` interface with an
+  in-memory test implementation; parity tests cite their sources; the
+  matrix (`docs/parity.md`) is the coverage contract — a feature isn't
+  "have" until its row has tests.
 - New capability: headless/CLI-callable first, UI on top second.
 - `docs/` holds subsystem docs — check each file's `read_when` header before
   working on that area.

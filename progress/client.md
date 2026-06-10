@@ -60,3 +60,39 @@ invariant gets promoted to CLAUDE.md when Phase 0 lands.
 unused expressions + useless `points` assignment, useGame.ts ref access
 during render, format.ts). Some look semantic, not cosmetic — needs its own
 session.
+
+## 2026-06-09 — M1: mechanics parity (engine + parity suite)
+
+**This session (runner M0–M1)**: M0 cleared the 10 lint errors (useGame
+lazy-useState instead of ref-during-render; engine expression statements).
+M1 implemented every §13 engine fix + D1 + D3 and shipped the parity suite.
+
+**Engine changes** (`src/engine/`):
+- **SRS+** (D1): I 90° kicks replaced with TETR.IO's y-symmetric table,
+  minimal I-180 kicks added. Numbers re-fetched this session from
+  TemariVirus/Budget-Tetris-Engine (srs_plus.zig / srs_tetrio.zig) and
+  cross-checked against the repo's plain-SRS table + wiki description.
+- T-spin-0 locks now reset combo · post-cap (15 resets) grounded pieces
+  lock on next tick · pieces drop one row immediately on spawn ·
+  garbage push-out above the buffer is a top-out (rows never silently
+  deleted) · B2B quad PC = 3200 · marathon ends at level 15 as a win
+  (PB = score; controller already handled `win` generically).
+
+**Parity suite**: `src/engine/parity.test.ts` — 30 tests covering every
+docs/parity.md §1–4 baseline row, each citing its source; includes exact
+kick-table comparisons (published y-up values verbatim, negated), a real
+kick-5 TST chamber, mini-spin setups, exact-score assertions. 82 tests
+green; lint/build clean.
+
+**Docs**: parity.md statuses flipped for the fixed rows; engine.md gained
+"Ruleset & intentional divergences" (SRS+, 0 ARE, D2 lift, marathon 15,
+mini-TSD 400); the deterministically-drivable invariant promoted to
+CLAUDE.md (closes the Phase 0 open thread).
+
+**Open threads**: mini-TSD (400) has no behavioral test (no reachable
+setup without exotic kicks — documented in the suite). Next: M2 replay
+recording (D5).
+
+**Cross-stream flag**: SRS+ changes I-piece kick behavior — any future
+bot/placement-search code must use `kicksFor` rather than assuming
+plain SRS.

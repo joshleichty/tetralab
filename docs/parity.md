@@ -11,6 +11,11 @@ until its row has tests (parity suite, Phase 1) — this file is the coverage
 contract. Quality beats scope: a `baseline` grade never justifies shipping a
 janky version (see CLAUDE.md / quality bar).
 
+**Phase 1 (M1, 2026-06-09)**: §1–4 baseline rows are encoded in
+`src/engine/parity.test.ts` with per-test source citations; the §13 engine
+fixes and decisions D1 (SRS+) / D3 (marathon 15) are implemented. SRS+
+numbers were re-fetched from [TV] source files during M1.
+
 **Status** — ✓ have (verified) · △ divergent · ✗ missing
 **Grade** — `baseline` expected by a TETR.IO/Jstris player · `nice` later ·
 `out` not tetra · `DECIDE` user call recorded below
@@ -30,13 +35,13 @@ from tetr.io source).
 | Row | Status | Grade | Notes |
 | --- | --- | --- | --- |
 | SRS 90° kicks, JLSTZ (all 8 transitions) | ✓ | baseline | Hand-verified against [TW]/[HD], exact (tetra stores y-down; published tables y-up). `src/engine/srs.ts` |
-| SRS 90° kicks, I (all 8) | ✓ | baseline | Exact match to standard SRS [TW]/[HD]. Note TETR.IO *default* is SRS+ with y-symmetric I kicks [TW-TETR.IO][TV] — see Decision D1 |
+| SRS+ 90° kicks, I (all 8) | ✓ | baseline | D1 implemented: TETR.IO default SRS+ y-symmetric I kicks, exact vs [TV] srs_plus.zig |
 | O piece: no kicks, rotation no-op | ✓ | baseline | [TW]/[HD] "cannot kick" |
 | 180 kicks, JLSTZ+T (TETR.IO table, 6 tests) | ✓ | baseline | Hand-verified exact vs [TV] (extracted from tetr.io source). No guideline 180 standard exists; Jstris table undocumented even to players — TETR.IO's is the only defensible choice |
-| 180 kicks, I | △ | DECIDE | Tetra: none (= TETR.IO "SRS" table). TETR.IO default SRS+ adds minimal I-180 kicks: 0→2 +(0,+1); R→L +(+1,0); 2→0 +(0,−1); L→R +(−1,0) [TV]. Decision D1 |
+| 180 kicks, I | ✓ | baseline | D1 implemented: SRS+ minimal I-180 kicks 0→2 +(0,+1); R→L +(+1,0); 2→0 +(0,−1); L→R +(−1,0) [TV] |
 | Spawn columns (JLSTZ 3–5, O 4–5, I 3–6, 0-indexed) | ✓ | baseline | Left-handed modern standard [HD-Spawn]. `spawnX()` |
 | Spawn rows: hidden rows just above skyline, north-facing, flat-side down | ✓ | baseline | Rows 18–19 of the 40-row board = guideline rows 21–22 [TW-Guideline][PDF §3.4] |
-| Drop one row immediately on spawn if unobstructed | ✗ | baseline | "move down immediately after appearing" [TW-Guideline][PDF]. Affects effective lock feel and spawn parity |
+| Drop one row immediately on spawn if unobstructed | ✓ | baseline | Fixed in M1: "move down immediately after appearing" [TW-Guideline][PDF] |
 | ARE / generation delay | ✓ | baseline | Tetra has 0 ARE = modern competitive default ([TIO] `are:0`); [PDF] 0.2 s is the offline-guideline value. Intentional, documented here |
 
 ## 2. Locking & top-out
@@ -45,13 +50,13 @@ from tetr.io source).
 | --- | --- | --- | --- |
 | Lock delay 0.5 s, Extended Placement ("move reset") | ✓ | baseline | [PDF §5.7]; default + required for multiplayer. `cfg.lockDelay` 500 ms |
 | 15 move/rotation cap; counter restored only on new lowest row | ✓ | baseline | Matches [PDF §5.7] semantics incl. "previously reached row does NOT restore" |
-| Post-cap behavior: lock **immediately** on first surface touch | △ | baseline | [PDF §5.7]: after 15 moves, locks immediately on touching a surface. Tetra lets the residual 500 ms timer run instead. Subtle; fix in Phase 1 |
+| Post-cap behavior: lock **immediately** on first surface touch | ✓ | baseline | Fixed in M1 per [PDF §5.7]: with all 15 resets spent, a grounded piece locks on the next tick |
 | What counts as a "move" (airborne moves before first ground contact) | △ | nice | [PDF] counts 15 movements/rotations outright; tetra only counts while grounded or timer running. Encode chosen reading in tests; PDF text ambiguous in practice |
 | Hard drop locks instantly, +2/cell | ✓ | baseline | [PDF §5.4][TW-Scoring] |
 | Soft drop does not lock (normal lock delay applies) | ✓ | baseline | [PDF §5.5] |
-| Block out (spawn obstructed → game over) | △ | DECIDE | Tetra lifts the spawn up to 2 rows before declaring game over. Guideline games try one fallback row [HD-Spawn]; strict [PDF] is none. Decision D2 |
+| Block out (spawn obstructed → game over) | ✓ | baseline | D2 resolved: tetra keeps the 2-row lift as a documented intentional divergence (docs/engine.md); behavior encoded in the parity suite |
 | Lock out (piece locks entirely above visible field) | ✓ | baseline | [TW-Top_out]. `allAboveVisible` |
-| Garbage push-out top-out (block pushed above buffer → game over) | ✗ | baseline | [TW-Top_out] guideline rule. Tetra silently deletes row 0 on garbage rise — rows vanish. Real bug; matters for survival/cheese/battle |
+| Garbage push-out top-out (block pushed above buffer → game over) | ✓ | baseline | Fixed in M1 per [TW-Top_out]: a rise that would shove blocks above the buffer ends the game; rows never silently vanish |
 | Line clear delay 0 | ✓ | baseline | [TIO] `lineclear_are:0`, [JS] default 0 ms |
 
 ## 3. Scoring
@@ -64,9 +69,9 @@ from tetr.io source).
 | B2B ×1.5 on action score (not drops), first B2B clear unbonused | ✓ | baseline | [TW-Scoring][PDF §worked example]. Engine applies pre-level-multiply — algebraically identical |
 | B2B chain: only Single/Double/Triple breaks; T-spin-0 neither breaks nor bonuses | ✓ | baseline | [PDF][TW-Scoring] |
 | Combo 50 × count × level; first clear in chain scores 0 | ✓ | baseline | [TW-Scoring][HD]; indexing matches community convention |
-| Combo resets on **any** non-clearing lock | △ | baseline | Tetra: a T-spin-0 lock *preserves* combo (`clearLines` early-return excludes it from the reset path). Standard: any placement that clears nothing resets combo. Fix in Phase 1 |
+| Combo resets on **any** non-clearing lock | ✓ | baseline | Fixed in M1: T-spin-0 locks now reset combo like every other non-clearing placement |
 | Perfect clear bonuses 800/1200/1800/2000 × level, additive | ✓ | baseline | [TW-Scoring] (not in [PDF]; Tetris Effect-era values) |
-| B2B Tetris PC = 3200 × level | ✗ | baseline | [TW-Scoring]. Engine has no B2B-PC case |
+| B2B Tetris PC = 3200 × level | ✓ | baseline | Fixed in M1 per [TW-Scoring]: B2B quad PC bonus is 3200 instead of 2000 |
 | Soft drop +1/cell, hard drop +2/cell, flat (never level-multiplied) | ✓ | baseline | [TW-Scoring][PDF] |
 | Level multiplies clears/T-spins/combo only | ✓ | baseline | [TW-Scoring] |
 
@@ -77,7 +82,7 @@ from tetr.io source).
 | Gravity `(0.8−(L−1)·0.007)^(L−1)` s/row | ✓ | baseline | Verbatim [PDF §7][TW-Marathon]. Tetra caps at L20 + 0.5 ms/row floor (undocumented region; fine) |
 | Soft drop = SDF × gravity (guideline suggests 20×) | ✓ | baseline | [PDF §7.1]; tetra default SDF 20, user-settable 5–∞ |
 | Marathon: fixed goal, 10 lines/level | ✓ | baseline | [TW-Marathon] |
-| Marathon ends at level 15 (win state) | ✗ | DECIDE | [TW-Marathon] typical cap 15 (150 lines). Tetra marathon is endless. Decision D3 |
+| Marathon ends at level 15 (win state) | ✓ | baseline | D3 implemented: 150 lines = win, PB = score at finish [TW-Marathon] |
 | 7-bag Random Generator (pure Fisher-Yates per bag) | ✓ | baseline | [PDF §3.3][TW-Random_Generator][BD]. Seeded mulberry32 |
 | First-bag constraint | ✓ | baseline | None — correct: guideline specifies none; TETR.IO normal play has none (S/Z/O-skip is stride-mode only) [BD] |
 | Next queue: 5 previews | ✓ | baseline | [TIO] `nextcount` default 5, [JS] default 5. Configurable count = nice |
@@ -173,7 +178,7 @@ from tetr.io source).
 | Blitz (2 min, leveling) | ✓ | baseline | Controller-enforced timer |
 | Cheese race 10/18/100 | ✓ | baseline | [JS] parity; seeded non-repeating holes |
 | Survival (rising garbage) | ✓ | baseline | [JS] parity |
-| Marathon | △ | DECIDE | Endless vs guideline 15-level finish — D3 |
+| Marathon | ✓ | baseline | D3 implemented in M1: ends at level 15 as a win |
 | Zen / endless chill | ✗ | out→pedagogy | Mode carving belongs to pedagogy stream |
 | Battle (vs scripted pressure) | ✗ | baseline | Spec Phases 2–3 |
 | Online 1v1 (invite link) | ✗ | baseline | Spec Phase 4 |

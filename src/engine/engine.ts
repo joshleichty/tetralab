@@ -25,6 +25,8 @@ const CLEAR_POINTS = [0, 100, 300, 500, 800]
 const TSPIN_POINTS = [400, 800, 1200, 1600]
 const TSPIN_MINI_POINTS = [100, 200, 400]
 const PERFECT_CLEAR_POINTS = [0, 800, 1200, 1800, 2000]
+const B2B_QUAD_PC_POINTS = 3200
+const MARATHON_FINAL_LEVEL = 15
 const COMBO_POINTS = 50
 const B2B_MULT = 1.5
 const SPRINT_GOAL = 40
@@ -167,6 +169,12 @@ export class Engine {
 
     if (grounded) {
       this.gravityAcc = 0
+      // post-cap: once all lock-delay resets are spent, the piece locks
+      // immediately on touching a surface instead of running the timer
+      if (this.lockResets >= this.cfg.maxLockResets) {
+        this.lockPiece()
+        return
+      }
       this.lockTimer += dtMs
       if (this.lockTimer >= this.cfg.lockDelay) {
         this.lockPiece()
@@ -383,9 +391,10 @@ export class Engine {
     }
 
     const n = rows.length
-    if (n === 0 && tspin === 'none') {
+    if (n === 0) {
+      // any non-clearing lock breaks the combo, including a T-spin-0
       this.combo = -1
-      return
+      if (tspin === 'none') return
     }
 
     // collapse
@@ -425,7 +434,10 @@ export class Engine {
     if (n > 0 && this.combo > 0) points += COMBO_POINTS * this.combo * this.level
 
     const perfectClear = n > 0 && this.board.every((c) => c === 0)
-    if (perfectClear) points += PERFECT_CLEAR_POINTS[n] * this.level
+    if (perfectClear) {
+      const bonus = n === 4 && b2bActive ? B2B_QUAD_PC_POINTS : PERFECT_CLEAR_POINTS[n]
+      points += bonus * this.level
+    }
 
     this.score += points
     this.lines += n
@@ -438,6 +450,17 @@ export class Engine {
     }
 
     if (this.cfg.mode === 'sprint' && this.lines >= SPRINT_GOAL) {
+      this.status = 'won'
+      this.events.push({ kind: 'win' })
+      return
+    }
+
+    // marathon ends as a win on completing level 15 (10 lines per level)
+    if (
+      this.cfg.mode === 'marathon' &&
+      this.lines >= (MARATHON_FINAL_LEVEL - this.cfg.startLevel + 1) * 10
+    ) {
+      this.level = MARATHON_FINAL_LEVEL
       this.status = 'won'
       this.events.push({ kind: 'win' })
       return
@@ -465,9 +488,16 @@ export class Engine {
     this.lastMoveWasRotation = false
 
     // block out: try the spawn cell, then one and two rows higher
+    // (the 2-row lift is an intentional lenient divergence — D2 in docs/parity.md)
     for (let lift = 0; lift <= 2; lift++) {
       if (this.canFit(piece.x, piece.y - lift, piece.rot)) {
         piece.y -= lift
+        // guideline: a freshly generated piece immediately drops one row
+        // if nothing obstructs it [PDF §3.4 / tetris.wiki Tetris_Guideline]
+        if (this.canFit(piece.x, piece.y + 1, piece.rot)) {
+          piece.y += 1
+          this.lowestY = piece.y
+        }
         return
       }
     }
@@ -494,7 +524,12 @@ export class Engine {
   addGarbage(rows: number, holeColumn: number) {
     if (this.status !== 'playing' || rows <= 0) return
     const hole = Math.max(0, Math.min(BOARD_W - 1, holeColumn))
-    for (let r = 0; r < rows; r++) this.pushGarbageRow(hole)
+    for (let r = 0; r < rows; r++) {
+      if (!this.pushGarbageRow(hole)) {
+        this.gameOver()
+        return
+      }
+    }
     this.liftActive()
     if (this.status === 'playing') this.events.push({ kind: 'garbage', rows })
   }
@@ -511,7 +546,10 @@ export class Engine {
         hole = (hole + 1 + Math.floor(this.garbageRng() * (BOARD_W - 1))) % BOARD_W
       }
       this.lastHole = hole
-      this.pushGarbageRow(hole)
+      if (!this.pushGarbageRow(hole)) {
+        this.gameOver()
+        return
+      }
     }
     this.liftActive()
     if (this.status === 'playing') this.events.push({ kind: 'garbage', rows })
@@ -543,12 +581,20 @@ export class Engine {
     this.cheesePool -= want
   }
 
-  private pushGarbageRow(hole: number) {
+  /**
+   * @returns false on a push-out top-out: a block shoved above the top of
+   * the buffer ends the game [tetris.wiki Top_out] instead of vanishing.
+   */
+  private pushGarbageRow(hole: number): boolean {
+    for (let x = 0; x < BOARD_W; x++) {
+      if (this.board[x] !== 0) return false
+    }
     this.board.copyWithin(0, BOARD_W)
     const y = BOARD_H - 1
     for (let x = 0; x < BOARD_W; x++) {
       this.board[y * BOARD_W + x] = x === hole ? 0 : CELL_GARBAGE
     }
+    return true
   }
 
   /** after a rise, lift the active piece out of the stack if it got buried */
