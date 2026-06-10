@@ -167,6 +167,54 @@ kbd {
   align-items: stretch;
 }
 
+/* ── battle: garbage meter + opponent hp ─────────────────────── */
+
+.garbage-meter {
+  position: absolute;
+  left: -7px;
+  bottom: 0;
+  top: 0;
+  width: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: rgba(235, 235, 245, 0.04);
+}
+
+.garbage-meter-fill {
+  width: 100%;
+  background: #e06e73;
+  box-shadow: 0 0 10px rgba(224, 110, 115, 0.45);
+  transition: height 160ms ease-out;
+}
+
+.opponent-panel {
+  align-items: stretch;
+  gap: 9px;
+}
+
+.hp-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line-strong);
+  overflow: hidden;
+}
+
+.hp-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 220ms ease-out;
+}
+
+.hp-num {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  color: var(--ink-dim);
+  text-align: right;
+}
+
 /* ── stats ────────────────────────────────────────────────────── */
 
 .stats {

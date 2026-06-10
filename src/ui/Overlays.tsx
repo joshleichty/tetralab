@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import type { GameController } from '../game/controller'
+import type { BattlePreset, GameController } from '../game/controller'
+import { BATTLE_PRESETS } from '../game/controller'
 import type { Mode } from '../engine/types'
 import type { BestRecords } from '../game/settings'
 import { formatTime } from '../game/useGame'
@@ -20,6 +21,7 @@ export function Menu({
   onOpenSettings: () => void
 }) {
   const [cheeseGoal, setCheeseGoal] = useState(ctrl.cheeseTotal)
+  const [battlePreset, setBattlePreset] = useState<BattlePreset>(ctrl.battlePreset)
   const best = ctrl.best
   const bestFor = (mode: Mode) => {
     if (mode === 'sprint') return best.sprint !== undefined ? formatTime(best.sprint) : null
@@ -49,7 +51,42 @@ export function Menu({
           </button>
         ))}
 
-        <span className="mode-group" style={{ animationDelay: '330ms' }}>
+        <span className="mode-group" style={{ animationDelay: '290ms' }}>
+          versus
+        </span>
+
+        <button
+          className="mode-row"
+          style={{ animationDelay: '330ms' }}
+          onClick={() => ctrl.start('battle', { battlePreset })}
+        >
+          <span className="mode-name">battle</span>
+          <span className="mode-desc">
+            outlast{' '}
+            <span className="goal-chips" onClick={(e) => e.stopPropagation()}>
+              {(Object.keys(BATTLE_PRESETS) as BattlePreset[]).map((p) => (
+                <span
+                  key={p}
+                  role="button"
+                  tabIndex={0}
+                  className={`goal-chip${battlePreset === p ? ' active' : ''}`}
+                  onClick={() => setBattlePreset(p)}
+                  onKeyDown={(e) => e.key === 'Enter' && setBattlePreset(p)}
+                >
+                  {p}
+                </span>
+              ))}
+            </span>{' '}
+            pressure · attack to win
+          </span>
+          <span className="mode-best">
+            {best[`battle_${battlePreset}`] !== undefined
+              ? formatTime(best[`battle_${battlePreset}`]!)
+              : '—'}
+          </span>
+        </button>
+
+        <span className="mode-group" style={{ animationDelay: '360ms' }}>
           training
         </span>
 
@@ -148,7 +185,8 @@ export function ResultsOverlay({ ctrl }: { ctrl: GameController }) {
   const r = ctrl.result
   if (!r) return null
 
-  const timed = r.mode === 'sprint' || r.mode === 'cheese' || r.mode === 'survival'
+  const timed =
+    r.mode === 'sprint' || r.mode === 'cheese' || r.mode === 'survival' || r.mode === 'battle'
   const title =
     r.mode === 'survival'
       ? formatTime(r.timeMs)
@@ -175,14 +213,16 @@ export function ResultsOverlay({ ctrl }: { ctrl: GameController }) {
           ? '40 lines cleared'
           : r.mode === 'cheese'
             ? `${r.cheeseTotal} lines of cheese, dug`
-            : r.mode === 'blitz'
-              ? 'final score'
+            : r.mode === 'battle'
+              ? `${r.battlePreset} opponent, downed`
               : 'final score'
         : r.mode === 'sprint'
           ? `${r.lines} / 40 lines`
           : r.mode === 'cheese'
             ? `${r.lines} lines dug`
-            : `score ${r.score.toLocaleString()}`
+            : r.mode === 'battle'
+              ? `opponent at ${r.opponentHp} / ${r.opponentMaxHp} hp`
+              : `score ${r.score.toLocaleString()}`
 
   return (
     <div className="overlay dim results">
@@ -211,6 +251,18 @@ export function ResultsOverlay({ ctrl }: { ctrl: GameController }) {
           <div>
             <dt>level</dt>
             <dd>{r.level}</dd>
+          </div>
+        )}
+        {r.attack !== undefined && (
+          <div>
+            <dt>attack</dt>
+            <dd>{r.attack}</dd>
+          </div>
+        )}
+        {r.attack !== undefined && r.timeMs > 0 && (
+          <div>
+            <dt>apm</dt>
+            <dd>{(r.attack / (r.timeMs / 60_000)).toFixed(1)}</dd>
           </div>
         )}
         <div>

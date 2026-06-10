@@ -1,6 +1,14 @@
 import { useState } from 'react'
 import { useGame } from './game/useGame'
-import { ActionCaption, BoardCanvas, HoldBox, QueueBox, StatsPanel } from './ui/Hud'
+import {
+  ActionCaption,
+  BoardCanvas,
+  GarbageMeter,
+  HoldBox,
+  OpponentPanel,
+  QueueBox,
+  StatsPanel,
+} from './ui/Hud'
 import { Countdown, Menu, PauseOverlay, ResultsOverlay } from './ui/Overlays'
 import { SettingsModal } from './ui/SettingsModal'
 
@@ -25,6 +33,7 @@ export default function App() {
           </aside>
 
           <div className="field-frame">
+            {ctrl.mode === 'battle' && <GarbageMeter ctrl={ctrl} />}
             <BoardCanvas ctrl={ctrl} />
             {ctrl.phase === 'countdown' && <Countdown ctrl={ctrl} />}
             {ctrl.phase === 'paused' && !settingsOpen && (
@@ -35,6 +44,7 @@ export default function App() {
 
           <aside className="side side-right">
             <QueueBox ctrl={ctrl} />
+            {ctrl.mode === 'battle' && <OpponentPanel ctrl={ctrl} />}
           </aside>
         </main>
       )}

@@ -203,3 +203,36 @@ timing recorded — that design belongs to M6 lockstep.
 
 **Cross-stream flag (bot)**: `Opponent` in `src/engine/versus.ts` is the
 interface a future bot implements for sparring; `Match` is the harness.
+
+## 2026-06-09 — M5: battle mode UI (built; feel sign-off pending)
+
+**This session (runner M5)**: spec Phase 3 — one new mode on the existing
+renderer, exactly three new elements:
+
+- **Garbage meter**: thin red bar hugging the board's left edge, height =
+  pending lines (cell-scaled), 160 ms eased. Single red state — honest,
+  since our garbage is always "enters on next lock" imminent; the
+  yellow→red wind-up state machine becomes meaningful with online (M6+).
+- **Opponent HP**: quiet panel under NEXT — label, 4 px accent track,
+  tabular hp numbers.
+- **APM readout**: battle stats layout (time big, apm, attack, pps);
+  attack + APM also added to battle results. `ctrl.attackSent` tallies
+  attack events (all modes — Phase-5 metrics will reuse).
+
+Mode wiring: `start('battle', {battlePreset})` builds a `Match` with
+`ScriptedPressureOpponent`; presets casual/steady/fierce (APM 25/50/90 ×
+messiness 0/0.3/0.7 × HP 40/60/80) surfaced as menu chips like cheese
+goals; per-preset PBs (fastest win). Controller ticks the match (which
+ticks engine + opponent) and drains match events — existing
+sfx/fx/finish paths unchanged. Results: win = time + "opponent downed",
+loss = "opponent at N/M hp".
+
+Browser-verified: pressure builds in the meter, attack cancellation
+(quad vs 17 pending → no hp damage, correct), messy garbage entry
+visible, HP panel/stats render.
+
+**⏸ HUMAN GATE: feel sign-off required before M5 closes** — presets
+(APM/messiness/HP numbers), meter/HP-bar feel, battle soundscape.
+
+**Open threads**: garbage meter color states deferred (above) · battle
+replays don't capture opponent timing (M6 lockstep owns that design).

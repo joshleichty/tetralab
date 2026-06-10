@@ -136,7 +136,7 @@ from tetr.io source).
 | Row | Status | Grade | Notes |
 | --- | --- | --- | --- |
 | Live: time, lines, PPS, score, level (per-mode layouts) | ✓ | baseline | `StatsPanel` |
-| Live APM / attack stats | ✗ | baseline (Phase 2+) | Needs attack to exist; nearly free after `AttackConfig` [WN][JS] |
+| Live APM / attack stats | △ | baseline (Phase 2+) | M5: live APM + attack in the battle HUD and results. Other modes + VS score land with the Phase-5 metrics pass |
 | VS score | ✗ | baseline (Phase 2+) | `((sent+garbage cleared)/pieces)×PPS×100` [tetrio.team2xh.net] |
 | Finesse faults + KPP + input counter (Pro-mode-style, optional) | ✓ | baseline | Added in M3: `src/engine/finesse.ts` BFS optimum table ([HD-Finesse], real kick tables); faults/KPP/inputs in the results summary. Soft-dropped pieces exempt (documented) |
 | End-of-game summary depth | ✓ | baseline | Fixed in M3: adds inputs, KPP, holds, finesse faults, max combo, max B2B, clear-type breakdown incl. T-spin variants + PCs |
@@ -180,7 +180,7 @@ from tetr.io source).
 | Survival (rising garbage) | ✓ | baseline | [JS] parity |
 | Marathon | ✓ | baseline | D3 implemented in M1: ends at level 15 as a win |
 | Zen / endless chill | ✗ | out→pedagogy | Mode carving belongs to pedagogy stream |
-| Battle (vs scripted pressure) | △ | baseline | Substrate done in M4 (attack table, queue→cancel→enter, messiness, Opponent/Match — fully tested headlessly); UI lands in M5 |
+| Battle (vs scripted pressure) | △ | baseline | M4 substrate + M5 UI (garbage meter, opponent HP, APM, casual/steady/fierce presets, per-preset PBs). **Feel sign-off pending** (human gate) |
 | Online 1v1 (invite link) | ✗ | baseline | Spec Phase 4 |
 | Replays (record/playback) | △ | baseline | D5 implemented in M2: every finished game records `{version, config+seed, fixed-step action log}` (`src/engine/replay.ts`, persisted via `tetra.replays.v1`, round-trip-tested headlessly). Viewer deliberately deferred to the pedagogy Review surface |
 

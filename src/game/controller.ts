@@ -2,7 +2,9 @@ import { Engine } from '../engine/engine'
 import { optimalInputs } from '../engine/finesse'
 import { VISIBLE_START } from '../engine/pieces'
 import { ReplayRecorder, STEP_MS } from '../engine/replay'
+import { Match, ScriptedPressureOpponent } from '../engine/versus'
 import { saveReplay } from './replays'
+import { DEFAULT_ENGINE_CONFIG } from '../engine/types'
 import type { Action, Mode } from '../engine/types'
 import { InputHandler } from '../input/keyboard'
 import type { BindableAction } from '../input/keyboard'
@@ -37,6 +39,12 @@ export interface GameResult {
   isPersonalBest: boolean
   /** cheese mode: race size (10/18/100) */
   cheeseTotal?: number
+  /** battle mode */
+  battlePreset?: BattlePreset
+  opponentHp?: number
+  opponentMaxHp?: number
+  /** attack lines sent (battle) */
+  attack?: number
   /** end-of-game summary depth (docs/parity.md §8) */
   detail: GameDetail
 }
@@ -72,6 +80,15 @@ function emptyDetail(): GameDetail {
   }
 }
 
+/** battle difficulty = APM × messiness (× HP) presets, surfaced simply */
+export const BATTLE_PRESETS = {
+  casual: { apm: 25, messiness: 0, hp: 40 },
+  steady: { apm: 50, messiness: 0.3, hp: 60 },
+  fierce: { apm: 90, messiness: 0.7, hp: 80 },
+} as const
+
+export type BattlePreset = keyof typeof BATTLE_PRESETS
+
 const COUNTDOWN_MS = 1400
 const RESUME_COUNTDOWN_MS = 900
 const SAFELOCK_MS = 100
@@ -86,6 +103,11 @@ export class GameController {
   phase: Phase = 'menu'
   mode: Mode = 'marathon'
   engine: Engine | null = null
+  /** battle mode: the live match (engine === match.engine) */
+  match: Match | null = null
+  battlePreset: BattlePreset = 'casual'
+  /** attack lines sent this game (APM numerator) */
+  attackSent = 0
   result: GameResult | null = null
   actionLabel: ActionLabel | null = null
   /** ms remaining in the pre-game countdown */
@@ -196,16 +218,37 @@ export class GameController {
   /** cheese race size for the current/next cheese game */
   cheeseTotal = 18
 
-  start(mode: Mode, opts: { cheeseTotal?: number } = {}) {
+  start(mode: Mode, opts: { cheeseTotal?: number; battlePreset?: BattlePreset } = {}) {
     sfx.ensure()
     this.mode = mode
     if (opts.cheeseTotal) this.cheeseTotal = opts.cheeseTotal
-    this.engine = new Engine({
-      seed: (Math.random() * 0xffffffff) >>> 0,
-      mode,
-      sdf: this.settings.sdf,
-      cheeseTotal: this.cheeseTotal,
-    })
+    if (opts.battlePreset) this.battlePreset = opts.battlePreset
+    const seed = (Math.random() * 0xffffffff) >>> 0
+    if (mode === 'battle') {
+      const preset = BATTLE_PRESETS[this.battlePreset]
+      this.match = new Match(
+        {
+          seed,
+          sdf: this.settings.sdf,
+          attack: { ...DEFAULT_ENGINE_CONFIG.attack, messiness: preset.messiness },
+        },
+        new ScriptedPressureOpponent({
+          seed: (seed ^ 0x51f15eed) >>> 0,
+          apm: preset.apm,
+          hp: preset.hp,
+        }),
+      )
+      this.engine = this.match.engine
+    } else {
+      this.match = null
+      this.engine = new Engine({
+        seed,
+        mode,
+        sdf: this.settings.sdf,
+        cheeseTotal: this.cheeseTotal,
+      })
+    }
+    this.attackSent = 0
     this.recorder = new ReplayRecorder(this.engine.cfg)
     this.step = 0
     this.stepAcc = 0
@@ -244,6 +287,7 @@ export class GameController {
   quitToMenu() {
     this.phase = 'menu'
     this.engine = null
+    this.match = null
     this.recorder = null
     this.result = null
     this.emit()
@@ -308,9 +352,14 @@ export class GameController {
       while (this.stepAcc >= STEP_MS && this.phase === 'playing') {
         this.stepAcc -= STEP_MS
         this.input.update(STEP_MS)
-        this.engine.tick(STEP_MS)
+        if (this.match) {
+          this.match.tick(STEP_MS) // ticks the engine + opponent, routes attacks
+        } else {
+          this.engine.tick(STEP_MS)
+        }
         this.step++
         if (this.engine.status !== 'playing') break
+        if (this.match && this.match.status !== 'playing') break
         if (this.mode === 'blitz' && this.engine.elapsed >= BLITZ_MS) {
           this.engine.status = 'won'
           this.finish(true)
@@ -343,7 +392,8 @@ export class GameController {
   private drainEvents(now: number) {
     const engine = this.engine!
     let prevKind = ''
-    for (const ev of engine.takeEvents()) {
+    const events = this.match ? this.match.takeEvents() : engine.takeEvents()
+    for (const ev of events) {
       switch (ev.kind) {
         case 'move':
           sfx.play('move')
@@ -418,6 +468,9 @@ export class GameController {
           sfx.play('garbage')
           this.fx.shakeT = now
           break
+        case 'attack':
+          this.attackSent += ev.lines
+          break
         case 'softdrop':
           break
       }
@@ -463,6 +516,13 @@ export class GameController {
         this.best.survival = timeMs
         isPersonalBest = true
       }
+    } else if (this.mode === 'battle' && won) {
+      const key = `battle_${this.battlePreset}` as keyof BestRecords
+      const prev = this.best[key]
+      if (prev === undefined || timeMs < prev) {
+        this.best[key] = timeMs
+        isPersonalBest = true
+      }
     }
     if (isPersonalBest) saveBest(this.best)
 
@@ -477,6 +537,10 @@ export class GameController {
       pps,
       isPersonalBest,
       cheeseTotal: this.mode === 'cheese' ? this.cheeseTotal : undefined,
+      battlePreset: this.mode === 'battle' ? this.battlePreset : undefined,
+      opponentHp: this.match?.opponent.hp,
+      opponentMaxHp: this.match?.opponent.maxHp,
+      attack: this.mode === 'battle' ? this.attackSent : undefined,
       detail: {
         ...this.detail,
         inputs: this.input.keypresses,

@@ -109,6 +109,17 @@ export function StatsPanel({ ctrl }: { ctrl: GameController }) {
       </div>
     )
   }
+  if (ctrl.mode === 'battle') {
+    const apm = time > 0 ? (ctrl.attackSent / (time / 60_000)).toFixed(1) : '0.0'
+    return (
+      <div className="stats">
+        <Stat label="time" value={formatTime(time)} big />
+        <Stat label="apm" value={apm} />
+        <Stat label="attack" value={String(ctrl.attackSent)} />
+        <Stat label="pps" value={pps} />
+      </div>
+    )
+  }
   return (
     <div className="stats">
       <Stat label="score" value={e.score.toLocaleString()} big />
@@ -116,6 +127,38 @@ export function StatsPanel({ ctrl }: { ctrl: GameController }) {
       <Stat label="lines" value={String(e.lines)} />
       <Stat label="time" value={formatTime(time)} />
       <Stat label="pps" value={pps} />
+    </div>
+  )
+}
+
+/** battle: incoming-garbage meter hugging the board's left edge */
+export function GarbageMeter({ ctrl }: { ctrl: GameController }) {
+  const pending = ctrl.engine?.pendingGarbage() ?? 0
+  const cellPx = BOARD_PX_H / 22 // board canvas shows 22 rows
+  return (
+    <div className="garbage-meter" aria-label="incoming garbage">
+      <div
+        className="garbage-meter-fill"
+        style={{ height: Math.min(pending * cellPx, BOARD_PX_H) }}
+      />
+    </div>
+  )
+}
+
+/** battle: the phantom opponent's hit points */
+export function OpponentPanel({ ctrl }: { ctrl: GameController }) {
+  const m = ctrl.match
+  if (!m) return null
+  const pct = Math.max(0, m.opponent.hp / m.opponent.maxHp)
+  return (
+    <div className="panel opponent-panel">
+      <span className="panel-label">opponent</span>
+      <div className="hp-track">
+        <div className="hp-fill" style={{ width: `${pct * 100}%` }} />
+      </div>
+      <span className="hp-num">
+        {m.opponent.hp} / {m.opponent.maxHp}
+      </span>
     </div>
   )
 }

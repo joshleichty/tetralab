@@ -70,6 +70,10 @@ export interface BestRecords {
   cheese100?: number
   /** survival: longest time survived in ms */
   survival?: number
+  /** battle: fastest win in ms, per difficulty preset */
+  battle_casual?: number
+  battle_steady?: number
+  battle_fierce?: number
 }
 
 export function loadBest(): BestRecords {
