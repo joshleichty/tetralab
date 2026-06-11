@@ -1,0 +1,3772 @@
+{
+  "version": 1,
+  "pieces": {
+    "I": {
+      "0:0": {
+        "count": 1,
+        "sequences": [
+          [
+            "DL"
+          ]
+        ]
+      },
+      "0:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "L"
+          ],
+          [
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "0:2": {
+        "count": 1,
+        "sequences": [
+          [
+            "L"
+          ]
+        ]
+      },
+      "0:3": {
+        "count": 0,
+        "sequences": [
+          []
+        ]
+      },
+      "0:4": {
+        "count": 1,
+        "sequences": [
+          [
+            "R"
+          ]
+        ]
+      },
+      "0:5": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "R"
+          ],
+          [
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "0:6": {
+        "count": 1,
+        "sequences": [
+          [
+            "DR"
+          ]
+        ]
+      },
+      "1:-2": {
+        "count": 2,
+        "sequences": [
+          [
+            "CW",
+            "DL"
+          ],
+          [
+            "CCW",
+            "DL"
+          ]
+        ]
+      },
+      "1:-1": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "CCW"
+          ]
+        ]
+      },
+      "1:0": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "CW"
+          ]
+        ]
+      },
+      "1:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "L"
+          ]
+        ]
+      },
+      "1:2": {
+        "count": 1,
+        "sequences": [
+          [
+            "CCW"
+          ]
+        ]
+      },
+      "1:3": {
+        "count": 1,
+        "sequences": [
+          [
+            "CW"
+          ]
+        ]
+      },
+      "1:4": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "CW"
+          ],
+          [
+            "CW",
+            "R"
+          ]
+        ]
+      },
+      "1:5": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "CCW"
+          ]
+        ]
+      },
+      "1:6": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "CW"
+          ]
+        ]
+      },
+      "1:7": {
+        "count": 2,
+        "sequences": [
+          [
+            "CW",
+            "DR"
+          ],
+          [
+            "CCW",
+            "DR"
+          ]
+        ]
+      },
+      "2:0": {
+        "count": 1,
+        "sequences": [
+          [
+            "DL"
+          ]
+        ]
+      },
+      "2:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "L"
+          ],
+          [
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "2:2": {
+        "count": 1,
+        "sequences": [
+          [
+            "L"
+          ]
+        ]
+      },
+      "2:3": {
+        "count": 0,
+        "sequences": [
+          []
+        ]
+      },
+      "2:4": {
+        "count": 1,
+        "sequences": [
+          [
+            "R"
+          ]
+        ]
+      },
+      "2:5": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "R"
+          ],
+          [
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "2:6": {
+        "count": 1,
+        "sequences": [
+          [
+            "DR"
+          ]
+        ]
+      },
+      "3:-1": {
+        "count": 2,
+        "sequences": [
+          [
+            "CW",
+            "DL"
+          ],
+          [
+            "CCW",
+            "DL"
+          ]
+        ]
+      },
+      "3:0": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "CCW"
+          ]
+        ]
+      },
+      "3:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "CW"
+          ]
+        ]
+      },
+      "3:2": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "L"
+          ]
+        ]
+      },
+      "3:3": {
+        "count": 1,
+        "sequences": [
+          [
+            "CCW"
+          ]
+        ]
+      },
+      "3:4": {
+        "count": 1,
+        "sequences": [
+          [
+            "CW"
+          ]
+        ]
+      },
+      "3:5": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "CW"
+          ],
+          [
+            "CW",
+            "R"
+          ]
+        ]
+      },
+      "3:6": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "CCW"
+          ]
+        ]
+      },
+      "3:7": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "CW"
+          ]
+        ]
+      },
+      "3:8": {
+        "count": 2,
+        "sequences": [
+          [
+            "CW",
+            "DR"
+          ],
+          [
+            "CCW",
+            "DR"
+          ]
+        ]
+      }
+    },
+    "O": {
+      "0:0": {
+        "count": 1,
+        "sequences": [
+          [
+            "DL"
+          ]
+        ]
+      },
+      "0:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "0:2": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "L"
+          ]
+        ]
+      },
+      "0:3": {
+        "count": 1,
+        "sequences": [
+          [
+            "L"
+          ]
+        ]
+      },
+      "0:4": {
+        "count": 0,
+        "sequences": [
+          []
+        ]
+      },
+      "0:5": {
+        "count": 1,
+        "sequences": [
+          [
+            "R"
+          ]
+        ]
+      },
+      "0:6": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "0:7": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "0:8": {
+        "count": 1,
+        "sequences": [
+          [
+            "DR"
+          ]
+        ]
+      },
+      "1:0": {
+        "count": 1,
+        "sequences": [
+          [
+            "DL"
+          ]
+        ]
+      },
+      "1:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "1:2": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "L"
+          ]
+        ]
+      },
+      "1:3": {
+        "count": 1,
+        "sequences": [
+          [
+            "L"
+          ]
+        ]
+      },
+      "1:4": {
+        "count": 0,
+        "sequences": [
+          []
+        ]
+      },
+      "1:5": {
+        "count": 1,
+        "sequences": [
+          [
+            "R"
+          ]
+        ]
+      },
+      "1:6": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "1:7": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "1:8": {
+        "count": 1,
+        "sequences": [
+          [
+            "DR"
+          ]
+        ]
+      },
+      "2:0": {
+        "count": 1,
+        "sequences": [
+          [
+            "DL"
+          ]
+        ]
+      },
+      "2:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "2:2": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "L"
+          ]
+        ]
+      },
+      "2:3": {
+        "count": 1,
+        "sequences": [
+          [
+            "L"
+          ]
+        ]
+      },
+      "2:4": {
+        "count": 0,
+        "sequences": [
+          []
+        ]
+      },
+      "2:5": {
+        "count": 1,
+        "sequences": [
+          [
+            "R"
+          ]
+        ]
+      },
+      "2:6": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "2:7": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "2:8": {
+        "count": 1,
+        "sequences": [
+          [
+            "DR"
+          ]
+        ]
+      },
+      "3:0": {
+        "count": 1,
+        "sequences": [
+          [
+            "DL"
+          ]
+        ]
+      },
+      "3:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "3:2": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "L"
+          ]
+        ]
+      },
+      "3:3": {
+        "count": 1,
+        "sequences": [
+          [
+            "L"
+          ]
+        ]
+      },
+      "3:4": {
+        "count": 0,
+        "sequences": [
+          []
+        ]
+      },
+      "3:5": {
+        "count": 1,
+        "sequences": [
+          [
+            "R"
+          ]
+        ]
+      },
+      "3:6": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "3:7": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "3:8": {
+        "count": 1,
+        "sequences": [
+          [
+            "DR"
+          ]
+        ]
+      }
+    },
+    "T": {
+      "0:0": {
+        "count": 1,
+        "sequences": [
+          [
+            "DL"
+          ]
+        ]
+      },
+      "0:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "L"
+          ],
+          [
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "0:2": {
+        "count": 1,
+        "sequences": [
+          [
+            "L"
+          ]
+        ]
+      },
+      "0:3": {
+        "count": 0,
+        "sequences": [
+          []
+        ]
+      },
+      "0:4": {
+        "count": 1,
+        "sequences": [
+          [
+            "R"
+          ]
+        ]
+      },
+      "0:5": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "0:6": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "0:7": {
+        "count": 1,
+        "sequences": [
+          [
+            "DR"
+          ]
+        ]
+      },
+      "1:-1": {
+        "count": 2,
+        "sequences": [
+          [
+            "CW",
+            "DL"
+          ]
+        ]
+      },
+      "1:0": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "CW"
+          ]
+        ]
+      },
+      "1:1": {
+        "count": 3,
+        "sequences": [
+          [
+            "L",
+            "L",
+            "CW"
+          ],
+          [
+            "L",
+            "CW",
+            "L"
+          ],
+          [
+            "DL",
+            "R",
+            "CW"
+          ],
+          [
+            "DL",
+            "CW",
+            "R"
+          ],
+          [
+            "CW",
+            "L",
+            "L"
+          ]
+        ]
+      },
+      "1:2": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "CW"
+          ],
+          [
+            "CW",
+            "L"
+          ]
+        ]
+      },
+      "1:3": {
+        "count": 1,
+        "sequences": [
+          [
+            "CW"
+          ]
+        ]
+      },
+      "1:4": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "CW"
+          ],
+          [
+            "CW",
+            "R"
+          ]
+        ]
+      },
+      "1:5": {
+        "count": 3,
+        "sequences": [
+          [
+            "R",
+            "R",
+            "CW"
+          ],
+          [
+            "R",
+            "CW",
+            "R"
+          ],
+          [
+            "CW",
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "1:6": {
+        "count": 3,
+        "sequences": [
+          [
+            "DR",
+            "L",
+            "CW"
+          ],
+          [
+            "DR",
+            "CW",
+            "L"
+          ],
+          [
+            "CW",
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "1:7": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "CW"
+          ],
+          [
+            "CW",
+            "DR"
+          ]
+        ]
+      },
+      "2:0": {
+        "count": 3,
+        "sequences": [
+          [
+            "DL",
+            "CW",
+            "CW"
+          ],
+          [
+            "DL",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "CW",
+            "DL",
+            "CW"
+          ],
+          [
+            "CW",
+            "CW",
+            "DL"
+          ],
+          [
+            "CCW",
+            "DL",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "DL"
+          ]
+        ]
+      },
+      "2:1": {
+        "count": 4,
+        "sequences": [
+          [
+            "L",
+            "L",
+            "CW",
+            "CW"
+          ],
+          [
+            "L",
+            "L",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "L",
+            "CW",
+            "L",
+            "CW"
+          ],
+          [
+            "L",
+            "CW",
+            "CW",
+            "L"
+          ],
+          [
+            "L",
+            "CCW",
+            "L",
+            "CCW"
+          ],
+          [
+            "L",
+            "CCW",
+            "CCW",
+            "L"
+          ],
+          [
+            "DL",
+            "R",
+            "CW",
+            "CW"
+          ],
+          [
+            "DL",
+            "R",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "DL",
+            "CW",
+            "R",
+            "CW"
+          ],
+          [
+            "DL",
+            "CW",
+            "CW",
+            "R"
+          ],
+          [
+            "DL",
+            "CCW",
+            "R",
+            "CCW"
+          ],
+          [
+            "DL",
+            "CCW",
+            "CCW",
+            "R"
+          ],
+          [
+            "CW",
+            "L",
+            "L",
+            "CW"
+          ],
+          [
+            "CW",
+            "L",
+            "CW",
+            "L"
+          ],
+          [
+            "CW",
+            "DL",
+            "CW",
+            "R"
+          ],
+          [
+            "CW",
+            "CW",
+            "L",
+            "L"
+          ],
+          [
+            "CW",
+            "CW",
+            "DL",
+            "R"
+          ],
+          [
+            "CCW",
+            "L",
+            "L",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "L",
+            "CCW",
+            "L"
+          ],
+          [
+            "CCW",
+            "DL",
+            "R",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "DL",
+            "CCW",
+            "R"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "L",
+            "L"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "2:2": {
+        "count": 3,
+        "sequences": [
+          [
+            "L",
+            "CW",
+            "CW"
+          ],
+          [
+            "L",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "CW",
+            "L",
+            "CW"
+          ],
+          [
+            "CW",
+            "CW",
+            "L"
+          ],
+          [
+            "CCW",
+            "L",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "L"
+          ]
+        ]
+      },
+      "2:3": {
+        "count": 2,
+        "sequences": [
+          [
+            "CW",
+            "CW"
+          ],
+          [
+            "CCW",
+            "CCW"
+          ]
+        ]
+      },
+      "2:4": {
+        "count": 3,
+        "sequences": [
+          [
+            "R",
+            "CW",
+            "CW"
+          ],
+          [
+            "R",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "CW",
+            "R",
+            "CW"
+          ],
+          [
+            "CW",
+            "CW",
+            "R"
+          ],
+          [
+            "CCW",
+            "R",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "R"
+          ]
+        ]
+      },
+      "2:5": {
+        "count": 4,
+        "sequences": [
+          [
+            "R",
+            "R",
+            "CW",
+            "CW"
+          ],
+          [
+            "R",
+            "R",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "R",
+            "CW",
+            "R",
+            "CW"
+          ],
+          [
+            "R",
+            "CW",
+            "CW",
+            "R"
+          ],
+          [
+            "R",
+            "CCW",
+            "R",
+            "CCW"
+          ],
+          [
+            "R",
+            "CCW",
+            "CCW",
+            "R"
+          ],
+          [
+            "CW",
+            "R",
+            "R",
+            "CW"
+          ],
+          [
+            "CW",
+            "R",
+            "CW",
+            "R"
+          ],
+          [
+            "CW",
+            "CW",
+            "R",
+            "R"
+          ],
+          [
+            "CCW",
+            "R",
+            "R",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "R",
+            "CCW",
+            "R"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "2:6": {
+        "count": 4,
+        "sequences": [
+          [
+            "DR",
+            "L",
+            "CW",
+            "CW"
+          ],
+          [
+            "DR",
+            "L",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "DR",
+            "CW",
+            "L",
+            "CW"
+          ],
+          [
+            "DR",
+            "CW",
+            "CW",
+            "L"
+          ],
+          [
+            "DR",
+            "CCW",
+            "L",
+            "CCW"
+          ],
+          [
+            "DR",
+            "CCW",
+            "CCW",
+            "L"
+          ],
+          [
+            "CW",
+            "DR",
+            "L",
+            "CW"
+          ],
+          [
+            "CW",
+            "DR",
+            "CW",
+            "L"
+          ],
+          [
+            "CW",
+            "CW",
+            "DR",
+            "L"
+          ],
+          [
+            "CCW",
+            "DR",
+            "CCW",
+            "L"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "2:7": {
+        "count": 3,
+        "sequences": [
+          [
+            "DR",
+            "CW",
+            "CW"
+          ],
+          [
+            "DR",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "CW",
+            "DR",
+            "CW"
+          ],
+          [
+            "CW",
+            "CW",
+            "DR"
+          ],
+          [
+            "CCW",
+            "DR",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "DR"
+          ]
+        ]
+      },
+      "3:0": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "DL"
+          ]
+        ]
+      },
+      "3:1": {
+        "count": 3,
+        "sequences": [
+          [
+            "L",
+            "L",
+            "CCW"
+          ],
+          [
+            "L",
+            "CCW",
+            "L"
+          ],
+          [
+            "DL",
+            "R",
+            "CCW"
+          ],
+          [
+            "DL",
+            "CCW",
+            "R"
+          ],
+          [
+            "CCW",
+            "L",
+            "L"
+          ],
+          [
+            "CCW",
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "3:2": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "L"
+          ]
+        ]
+      },
+      "3:3": {
+        "count": 1,
+        "sequences": [
+          [
+            "CCW"
+          ]
+        ]
+      },
+      "3:4": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "R"
+          ]
+        ]
+      },
+      "3:5": {
+        "count": 3,
+        "sequences": [
+          [
+            "R",
+            "R",
+            "CCW"
+          ],
+          [
+            "R",
+            "CCW",
+            "R"
+          ],
+          [
+            "CCW",
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "3:6": {
+        "count": 3,
+        "sequences": [
+          [
+            "DR",
+            "L",
+            "CCW"
+          ],
+          [
+            "DR",
+            "CCW",
+            "L"
+          ]
+        ]
+      },
+      "3:7": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "CCW"
+          ]
+        ]
+      },
+      "3:8": {
+        "count": 2,
+        "sequences": [
+          [
+            "CCW",
+            "DR"
+          ]
+        ]
+      }
+    },
+    "S": {
+      "0:0": {
+        "count": 1,
+        "sequences": [
+          [
+            "DL"
+          ]
+        ]
+      },
+      "0:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "L"
+          ],
+          [
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "0:2": {
+        "count": 1,
+        "sequences": [
+          [
+            "L"
+          ]
+        ]
+      },
+      "0:3": {
+        "count": 0,
+        "sequences": [
+          []
+        ]
+      },
+      "0:4": {
+        "count": 1,
+        "sequences": [
+          [
+            "R"
+          ]
+        ]
+      },
+      "0:5": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "0:6": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "0:7": {
+        "count": 1,
+        "sequences": [
+          [
+            "DR"
+          ]
+        ]
+      },
+      "1:-1": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "CCW"
+          ],
+          [
+            "CW",
+            "DL"
+          ],
+          [
+            "CCW",
+            "DL"
+          ]
+        ]
+      },
+      "1:0": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "CW"
+          ]
+        ]
+      },
+      "1:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "L"
+          ]
+        ]
+      },
+      "1:2": {
+        "count": 1,
+        "sequences": [
+          [
+            "CCW"
+          ]
+        ]
+      },
+      "1:3": {
+        "count": 1,
+        "sequences": [
+          [
+            "CW"
+          ]
+        ]
+      },
+      "1:4": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "CW"
+          ],
+          [
+            "CW",
+            "R"
+          ]
+        ]
+      },
+      "1:5": {
+        "count": 3,
+        "sequences": [
+          [
+            "R",
+            "R",
+            "CW"
+          ],
+          [
+            "R",
+            "CW",
+            "R"
+          ],
+          [
+            "DR",
+            "L",
+            "CCW"
+          ],
+          [
+            "DR",
+            "CCW",
+            "L"
+          ],
+          [
+            "CW",
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "1:6": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "CCW"
+          ]
+        ]
+      },
+      "1:7": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "CW"
+          ],
+          [
+            "CW",
+            "DR"
+          ],
+          [
+            "CCW",
+            "DR"
+          ]
+        ]
+      },
+      "2:0": {
+        "count": 1,
+        "sequences": [
+          [
+            "DL"
+          ]
+        ]
+      },
+      "2:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "L"
+          ],
+          [
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "2:2": {
+        "count": 1,
+        "sequences": [
+          [
+            "L"
+          ]
+        ]
+      },
+      "2:3": {
+        "count": 0,
+        "sequences": [
+          []
+        ]
+      },
+      "2:4": {
+        "count": 1,
+        "sequences": [
+          [
+            "R"
+          ]
+        ]
+      },
+      "2:5": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "2:6": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "2:7": {
+        "count": 1,
+        "sequences": [
+          [
+            "DR"
+          ]
+        ]
+      },
+      "3:0": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "CCW"
+          ],
+          [
+            "CW",
+            "DL"
+          ],
+          [
+            "CCW",
+            "DL"
+          ]
+        ]
+      },
+      "3:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "CW"
+          ]
+        ]
+      },
+      "3:2": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "L"
+          ]
+        ]
+      },
+      "3:3": {
+        "count": 1,
+        "sequences": [
+          [
+            "CCW"
+          ]
+        ]
+      },
+      "3:4": {
+        "count": 1,
+        "sequences": [
+          [
+            "CW"
+          ]
+        ]
+      },
+      "3:5": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "CW"
+          ],
+          [
+            "CW",
+            "R"
+          ]
+        ]
+      },
+      "3:6": {
+        "count": 3,
+        "sequences": [
+          [
+            "R",
+            "R",
+            "CW"
+          ],
+          [
+            "R",
+            "CW",
+            "R"
+          ],
+          [
+            "DR",
+            "L",
+            "CCW"
+          ],
+          [
+            "DR",
+            "CCW",
+            "L"
+          ],
+          [
+            "CW",
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "3:7": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "CCW"
+          ]
+        ]
+      },
+      "3:8": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "CW"
+          ],
+          [
+            "CW",
+            "DR"
+          ],
+          [
+            "CCW",
+            "DR"
+          ]
+        ]
+      }
+    },
+    "Z": {
+      "0:0": {
+        "count": 1,
+        "sequences": [
+          [
+            "DL"
+          ]
+        ]
+      },
+      "0:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "L"
+          ],
+          [
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "0:2": {
+        "count": 1,
+        "sequences": [
+          [
+            "L"
+          ]
+        ]
+      },
+      "0:3": {
+        "count": 0,
+        "sequences": [
+          []
+        ]
+      },
+      "0:4": {
+        "count": 1,
+        "sequences": [
+          [
+            "R"
+          ]
+        ]
+      },
+      "0:5": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "0:6": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "0:7": {
+        "count": 1,
+        "sequences": [
+          [
+            "DR"
+          ]
+        ]
+      },
+      "1:-1": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "CCW"
+          ],
+          [
+            "CW",
+            "DL"
+          ],
+          [
+            "CCW",
+            "DL"
+          ]
+        ]
+      },
+      "1:0": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "CW"
+          ]
+        ]
+      },
+      "1:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "L"
+          ]
+        ]
+      },
+      "1:2": {
+        "count": 1,
+        "sequences": [
+          [
+            "CCW"
+          ]
+        ]
+      },
+      "1:3": {
+        "count": 1,
+        "sequences": [
+          [
+            "CW"
+          ]
+        ]
+      },
+      "1:4": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "CW"
+          ],
+          [
+            "CW",
+            "R"
+          ]
+        ]
+      },
+      "1:5": {
+        "count": 3,
+        "sequences": [
+          [
+            "R",
+            "R",
+            "CW"
+          ],
+          [
+            "R",
+            "CW",
+            "R"
+          ],
+          [
+            "DR",
+            "L",
+            "CCW"
+          ],
+          [
+            "DR",
+            "CCW",
+            "L"
+          ],
+          [
+            "CW",
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "1:6": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "CCW"
+          ]
+        ]
+      },
+      "1:7": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "CW"
+          ],
+          [
+            "CW",
+            "DR"
+          ],
+          [
+            "CCW",
+            "DR"
+          ]
+        ]
+      },
+      "2:0": {
+        "count": 1,
+        "sequences": [
+          [
+            "DL"
+          ]
+        ]
+      },
+      "2:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "L"
+          ],
+          [
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "2:2": {
+        "count": 1,
+        "sequences": [
+          [
+            "L"
+          ]
+        ]
+      },
+      "2:3": {
+        "count": 0,
+        "sequences": [
+          []
+        ]
+      },
+      "2:4": {
+        "count": 1,
+        "sequences": [
+          [
+            "R"
+          ]
+        ]
+      },
+      "2:5": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "2:6": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "2:7": {
+        "count": 1,
+        "sequences": [
+          [
+            "DR"
+          ]
+        ]
+      },
+      "3:0": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "CCW"
+          ],
+          [
+            "CW",
+            "DL"
+          ],
+          [
+            "CCW",
+            "DL"
+          ]
+        ]
+      },
+      "3:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "CW"
+          ]
+        ]
+      },
+      "3:2": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "L"
+          ]
+        ]
+      },
+      "3:3": {
+        "count": 1,
+        "sequences": [
+          [
+            "CCW"
+          ]
+        ]
+      },
+      "3:4": {
+        "count": 1,
+        "sequences": [
+          [
+            "CW"
+          ]
+        ]
+      },
+      "3:5": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "CW"
+          ],
+          [
+            "CW",
+            "R"
+          ]
+        ]
+      },
+      "3:6": {
+        "count": 3,
+        "sequences": [
+          [
+            "R",
+            "R",
+            "CW"
+          ],
+          [
+            "R",
+            "CW",
+            "R"
+          ],
+          [
+            "DR",
+            "L",
+            "CCW"
+          ],
+          [
+            "DR",
+            "CCW",
+            "L"
+          ],
+          [
+            "CW",
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "3:7": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "CCW"
+          ]
+        ]
+      },
+      "3:8": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "CW"
+          ],
+          [
+            "CW",
+            "DR"
+          ],
+          [
+            "CCW",
+            "DR"
+          ]
+        ]
+      }
+    },
+    "J": {
+      "0:0": {
+        "count": 1,
+        "sequences": [
+          [
+            "DL"
+          ]
+        ]
+      },
+      "0:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "L"
+          ],
+          [
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "0:2": {
+        "count": 1,
+        "sequences": [
+          [
+            "L"
+          ]
+        ]
+      },
+      "0:3": {
+        "count": 0,
+        "sequences": [
+          []
+        ]
+      },
+      "0:4": {
+        "count": 1,
+        "sequences": [
+          [
+            "R"
+          ]
+        ]
+      },
+      "0:5": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "0:6": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "0:7": {
+        "count": 1,
+        "sequences": [
+          [
+            "DR"
+          ]
+        ]
+      },
+      "1:-1": {
+        "count": 2,
+        "sequences": [
+          [
+            "CW",
+            "DL"
+          ]
+        ]
+      },
+      "1:0": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "CW"
+          ]
+        ]
+      },
+      "1:1": {
+        "count": 3,
+        "sequences": [
+          [
+            "L",
+            "L",
+            "CW"
+          ],
+          [
+            "L",
+            "CW",
+            "L"
+          ],
+          [
+            "DL",
+            "R",
+            "CW"
+          ],
+          [
+            "DL",
+            "CW",
+            "R"
+          ],
+          [
+            "CW",
+            "L",
+            "L"
+          ]
+        ]
+      },
+      "1:2": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "CW"
+          ],
+          [
+            "CW",
+            "L"
+          ]
+        ]
+      },
+      "1:3": {
+        "count": 1,
+        "sequences": [
+          [
+            "CW"
+          ]
+        ]
+      },
+      "1:4": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "CW"
+          ],
+          [
+            "CW",
+            "R"
+          ]
+        ]
+      },
+      "1:5": {
+        "count": 3,
+        "sequences": [
+          [
+            "R",
+            "R",
+            "CW"
+          ],
+          [
+            "R",
+            "CW",
+            "R"
+          ],
+          [
+            "CW",
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "1:6": {
+        "count": 3,
+        "sequences": [
+          [
+            "DR",
+            "L",
+            "CW"
+          ],
+          [
+            "DR",
+            "CW",
+            "L"
+          ],
+          [
+            "CW",
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "1:7": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "CW"
+          ],
+          [
+            "CW",
+            "DR"
+          ]
+        ]
+      },
+      "2:0": {
+        "count": 3,
+        "sequences": [
+          [
+            "DL",
+            "CW",
+            "CW"
+          ],
+          [
+            "DL",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "CW",
+            "DL",
+            "CW"
+          ],
+          [
+            "CW",
+            "CW",
+            "DL"
+          ],
+          [
+            "CCW",
+            "DL",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "DL"
+          ]
+        ]
+      },
+      "2:1": {
+        "count": 4,
+        "sequences": [
+          [
+            "L",
+            "L",
+            "CW",
+            "CW"
+          ],
+          [
+            "L",
+            "L",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "L",
+            "CW",
+            "L",
+            "CW"
+          ],
+          [
+            "L",
+            "CW",
+            "CW",
+            "L"
+          ],
+          [
+            "L",
+            "CCW",
+            "L",
+            "CCW"
+          ],
+          [
+            "L",
+            "CCW",
+            "CCW",
+            "L"
+          ],
+          [
+            "DL",
+            "R",
+            "CW",
+            "CW"
+          ],
+          [
+            "DL",
+            "R",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "DL",
+            "CW",
+            "R",
+            "CW"
+          ],
+          [
+            "DL",
+            "CW",
+            "CW",
+            "R"
+          ],
+          [
+            "DL",
+            "CCW",
+            "R",
+            "CCW"
+          ],
+          [
+            "DL",
+            "CCW",
+            "CCW",
+            "R"
+          ],
+          [
+            "CW",
+            "L",
+            "L",
+            "CW"
+          ],
+          [
+            "CW",
+            "L",
+            "CW",
+            "L"
+          ],
+          [
+            "CW",
+            "DL",
+            "CW",
+            "R"
+          ],
+          [
+            "CW",
+            "CW",
+            "L",
+            "L"
+          ],
+          [
+            "CW",
+            "CW",
+            "DL",
+            "R"
+          ],
+          [
+            "CCW",
+            "L",
+            "L",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "L",
+            "CCW",
+            "L"
+          ],
+          [
+            "CCW",
+            "DL",
+            "R",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "DL",
+            "CCW",
+            "R"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "L",
+            "L"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "2:2": {
+        "count": 3,
+        "sequences": [
+          [
+            "L",
+            "CW",
+            "CW"
+          ],
+          [
+            "L",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "CW",
+            "L",
+            "CW"
+          ],
+          [
+            "CW",
+            "CW",
+            "L"
+          ],
+          [
+            "CCW",
+            "L",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "L"
+          ]
+        ]
+      },
+      "2:3": {
+        "count": 2,
+        "sequences": [
+          [
+            "CW",
+            "CW"
+          ],
+          [
+            "CCW",
+            "CCW"
+          ]
+        ]
+      },
+      "2:4": {
+        "count": 3,
+        "sequences": [
+          [
+            "R",
+            "CW",
+            "CW"
+          ],
+          [
+            "R",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "CW",
+            "R",
+            "CW"
+          ],
+          [
+            "CW",
+            "CW",
+            "R"
+          ],
+          [
+            "CCW",
+            "R",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "R"
+          ]
+        ]
+      },
+      "2:5": {
+        "count": 4,
+        "sequences": [
+          [
+            "R",
+            "R",
+            "CW",
+            "CW"
+          ],
+          [
+            "R",
+            "R",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "R",
+            "CW",
+            "R",
+            "CW"
+          ],
+          [
+            "R",
+            "CW",
+            "CW",
+            "R"
+          ],
+          [
+            "R",
+            "CCW",
+            "R",
+            "CCW"
+          ],
+          [
+            "R",
+            "CCW",
+            "CCW",
+            "R"
+          ],
+          [
+            "CW",
+            "R",
+            "R",
+            "CW"
+          ],
+          [
+            "CW",
+            "R",
+            "CW",
+            "R"
+          ],
+          [
+            "CW",
+            "CW",
+            "R",
+            "R"
+          ],
+          [
+            "CCW",
+            "R",
+            "R",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "R",
+            "CCW",
+            "R"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "2:6": {
+        "count": 4,
+        "sequences": [
+          [
+            "DR",
+            "L",
+            "CW",
+            "CW"
+          ],
+          [
+            "DR",
+            "L",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "DR",
+            "CW",
+            "L",
+            "CW"
+          ],
+          [
+            "DR",
+            "CW",
+            "CW",
+            "L"
+          ],
+          [
+            "DR",
+            "CCW",
+            "L",
+            "CCW"
+          ],
+          [
+            "DR",
+            "CCW",
+            "CCW",
+            "L"
+          ],
+          [
+            "CW",
+            "DR",
+            "L",
+            "CW"
+          ],
+          [
+            "CW",
+            "DR",
+            "CW",
+            "L"
+          ],
+          [
+            "CW",
+            "CW",
+            "DR",
+            "L"
+          ],
+          [
+            "CCW",
+            "DR",
+            "CCW",
+            "L"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "2:7": {
+        "count": 3,
+        "sequences": [
+          [
+            "DR",
+            "CW",
+            "CW"
+          ],
+          [
+            "DR",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "CW",
+            "DR",
+            "CW"
+          ],
+          [
+            "CW",
+            "CW",
+            "DR"
+          ],
+          [
+            "CCW",
+            "DR",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "DR"
+          ]
+        ]
+      },
+      "3:0": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "DL"
+          ]
+        ]
+      },
+      "3:1": {
+        "count": 3,
+        "sequences": [
+          [
+            "L",
+            "L",
+            "CCW"
+          ],
+          [
+            "L",
+            "CCW",
+            "L"
+          ],
+          [
+            "DL",
+            "R",
+            "CCW"
+          ],
+          [
+            "DL",
+            "CCW",
+            "R"
+          ],
+          [
+            "CCW",
+            "L",
+            "L"
+          ],
+          [
+            "CCW",
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "3:2": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "L"
+          ]
+        ]
+      },
+      "3:3": {
+        "count": 1,
+        "sequences": [
+          [
+            "CCW"
+          ]
+        ]
+      },
+      "3:4": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "R"
+          ]
+        ]
+      },
+      "3:5": {
+        "count": 3,
+        "sequences": [
+          [
+            "R",
+            "R",
+            "CCW"
+          ],
+          [
+            "R",
+            "CCW",
+            "R"
+          ],
+          [
+            "CCW",
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "3:6": {
+        "count": 3,
+        "sequences": [
+          [
+            "DR",
+            "L",
+            "CCW"
+          ],
+          [
+            "DR",
+            "CCW",
+            "L"
+          ]
+        ]
+      },
+      "3:7": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "CCW"
+          ]
+        ]
+      },
+      "3:8": {
+        "count": 2,
+        "sequences": [
+          [
+            "CCW",
+            "DR"
+          ]
+        ]
+      }
+    },
+    "L": {
+      "0:0": {
+        "count": 1,
+        "sequences": [
+          [
+            "DL"
+          ]
+        ]
+      },
+      "0:1": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "L"
+          ],
+          [
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "0:2": {
+        "count": 1,
+        "sequences": [
+          [
+            "L"
+          ]
+        ]
+      },
+      "0:3": {
+        "count": 0,
+        "sequences": [
+          []
+        ]
+      },
+      "0:4": {
+        "count": 1,
+        "sequences": [
+          [
+            "R"
+          ]
+        ]
+      },
+      "0:5": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "0:6": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "0:7": {
+        "count": 1,
+        "sequences": [
+          [
+            "DR"
+          ]
+        ]
+      },
+      "1:-1": {
+        "count": 2,
+        "sequences": [
+          [
+            "CW",
+            "DL"
+          ]
+        ]
+      },
+      "1:0": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "CW"
+          ]
+        ]
+      },
+      "1:1": {
+        "count": 3,
+        "sequences": [
+          [
+            "L",
+            "L",
+            "CW"
+          ],
+          [
+            "L",
+            "CW",
+            "L"
+          ],
+          [
+            "DL",
+            "R",
+            "CW"
+          ],
+          [
+            "DL",
+            "CW",
+            "R"
+          ],
+          [
+            "CW",
+            "L",
+            "L"
+          ]
+        ]
+      },
+      "1:2": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "CW"
+          ],
+          [
+            "CW",
+            "L"
+          ]
+        ]
+      },
+      "1:3": {
+        "count": 1,
+        "sequences": [
+          [
+            "CW"
+          ]
+        ]
+      },
+      "1:4": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "CW"
+          ],
+          [
+            "CW",
+            "R"
+          ]
+        ]
+      },
+      "1:5": {
+        "count": 3,
+        "sequences": [
+          [
+            "R",
+            "R",
+            "CW"
+          ],
+          [
+            "R",
+            "CW",
+            "R"
+          ],
+          [
+            "CW",
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "1:6": {
+        "count": 3,
+        "sequences": [
+          [
+            "DR",
+            "L",
+            "CW"
+          ],
+          [
+            "DR",
+            "CW",
+            "L"
+          ],
+          [
+            "CW",
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "1:7": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "CW"
+          ],
+          [
+            "CW",
+            "DR"
+          ]
+        ]
+      },
+      "2:0": {
+        "count": 3,
+        "sequences": [
+          [
+            "DL",
+            "CW",
+            "CW"
+          ],
+          [
+            "DL",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "CW",
+            "DL",
+            "CW"
+          ],
+          [
+            "CW",
+            "CW",
+            "DL"
+          ],
+          [
+            "CCW",
+            "DL",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "DL"
+          ]
+        ]
+      },
+      "2:1": {
+        "count": 4,
+        "sequences": [
+          [
+            "L",
+            "L",
+            "CW",
+            "CW"
+          ],
+          [
+            "L",
+            "L",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "L",
+            "CW",
+            "L",
+            "CW"
+          ],
+          [
+            "L",
+            "CW",
+            "CW",
+            "L"
+          ],
+          [
+            "L",
+            "CCW",
+            "L",
+            "CCW"
+          ],
+          [
+            "L",
+            "CCW",
+            "CCW",
+            "L"
+          ],
+          [
+            "DL",
+            "R",
+            "CW",
+            "CW"
+          ],
+          [
+            "DL",
+            "R",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "DL",
+            "CW",
+            "R",
+            "CW"
+          ],
+          [
+            "DL",
+            "CW",
+            "CW",
+            "R"
+          ],
+          [
+            "DL",
+            "CCW",
+            "R",
+            "CCW"
+          ],
+          [
+            "DL",
+            "CCW",
+            "CCW",
+            "R"
+          ],
+          [
+            "CW",
+            "L",
+            "L",
+            "CW"
+          ],
+          [
+            "CW",
+            "L",
+            "CW",
+            "L"
+          ],
+          [
+            "CW",
+            "DL",
+            "CW",
+            "R"
+          ],
+          [
+            "CW",
+            "CW",
+            "L",
+            "L"
+          ],
+          [
+            "CW",
+            "CW",
+            "DL",
+            "R"
+          ],
+          [
+            "CCW",
+            "L",
+            "L",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "L",
+            "CCW",
+            "L"
+          ],
+          [
+            "CCW",
+            "DL",
+            "R",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "DL",
+            "CCW",
+            "R"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "L",
+            "L"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "2:2": {
+        "count": 3,
+        "sequences": [
+          [
+            "L",
+            "CW",
+            "CW"
+          ],
+          [
+            "L",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "CW",
+            "L",
+            "CW"
+          ],
+          [
+            "CW",
+            "CW",
+            "L"
+          ],
+          [
+            "CCW",
+            "L",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "L"
+          ]
+        ]
+      },
+      "2:3": {
+        "count": 2,
+        "sequences": [
+          [
+            "CW",
+            "CW"
+          ],
+          [
+            "CCW",
+            "CCW"
+          ]
+        ]
+      },
+      "2:4": {
+        "count": 3,
+        "sequences": [
+          [
+            "R",
+            "CW",
+            "CW"
+          ],
+          [
+            "R",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "CW",
+            "R",
+            "CW"
+          ],
+          [
+            "CW",
+            "CW",
+            "R"
+          ],
+          [
+            "CCW",
+            "R",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "R"
+          ]
+        ]
+      },
+      "2:5": {
+        "count": 4,
+        "sequences": [
+          [
+            "R",
+            "R",
+            "CW",
+            "CW"
+          ],
+          [
+            "R",
+            "R",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "R",
+            "CW",
+            "R",
+            "CW"
+          ],
+          [
+            "R",
+            "CW",
+            "CW",
+            "R"
+          ],
+          [
+            "R",
+            "CCW",
+            "R",
+            "CCW"
+          ],
+          [
+            "R",
+            "CCW",
+            "CCW",
+            "R"
+          ],
+          [
+            "CW",
+            "R",
+            "R",
+            "CW"
+          ],
+          [
+            "CW",
+            "R",
+            "CW",
+            "R"
+          ],
+          [
+            "CW",
+            "CW",
+            "R",
+            "R"
+          ],
+          [
+            "CCW",
+            "R",
+            "R",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "R",
+            "CCW",
+            "R"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "2:6": {
+        "count": 4,
+        "sequences": [
+          [
+            "DR",
+            "L",
+            "CW",
+            "CW"
+          ],
+          [
+            "DR",
+            "L",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "DR",
+            "CW",
+            "L",
+            "CW"
+          ],
+          [
+            "DR",
+            "CW",
+            "CW",
+            "L"
+          ],
+          [
+            "DR",
+            "CCW",
+            "L",
+            "CCW"
+          ],
+          [
+            "DR",
+            "CCW",
+            "CCW",
+            "L"
+          ],
+          [
+            "CW",
+            "DR",
+            "L",
+            "CW"
+          ],
+          [
+            "CW",
+            "DR",
+            "CW",
+            "L"
+          ],
+          [
+            "CW",
+            "CW",
+            "DR",
+            "L"
+          ],
+          [
+            "CCW",
+            "DR",
+            "CCW",
+            "L"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "DR",
+            "L"
+          ]
+        ]
+      },
+      "2:7": {
+        "count": 3,
+        "sequences": [
+          [
+            "DR",
+            "CW",
+            "CW"
+          ],
+          [
+            "DR",
+            "CCW",
+            "CCW"
+          ],
+          [
+            "CW",
+            "DR",
+            "CW"
+          ],
+          [
+            "CW",
+            "CW",
+            "DR"
+          ],
+          [
+            "CCW",
+            "DR",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "CCW",
+            "DR"
+          ]
+        ]
+      },
+      "3:0": {
+        "count": 2,
+        "sequences": [
+          [
+            "DL",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "DL"
+          ]
+        ]
+      },
+      "3:1": {
+        "count": 3,
+        "sequences": [
+          [
+            "L",
+            "L",
+            "CCW"
+          ],
+          [
+            "L",
+            "CCW",
+            "L"
+          ],
+          [
+            "DL",
+            "R",
+            "CCW"
+          ],
+          [
+            "DL",
+            "CCW",
+            "R"
+          ],
+          [
+            "CCW",
+            "L",
+            "L"
+          ],
+          [
+            "CCW",
+            "DL",
+            "R"
+          ]
+        ]
+      },
+      "3:2": {
+        "count": 2,
+        "sequences": [
+          [
+            "L",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "L"
+          ]
+        ]
+      },
+      "3:3": {
+        "count": 1,
+        "sequences": [
+          [
+            "CCW"
+          ]
+        ]
+      },
+      "3:4": {
+        "count": 2,
+        "sequences": [
+          [
+            "R",
+            "CCW"
+          ],
+          [
+            "CCW",
+            "R"
+          ]
+        ]
+      },
+      "3:5": {
+        "count": 3,
+        "sequences": [
+          [
+            "R",
+            "R",
+            "CCW"
+          ],
+          [
+            "R",
+            "CCW",
+            "R"
+          ],
+          [
+            "CCW",
+            "R",
+            "R"
+          ]
+        ]
+      },
+      "3:6": {
+        "count": 3,
+        "sequences": [
+          [
+            "DR",
+            "L",
+            "CCW"
+          ],
+          [
+            "DR",
+            "CCW",
+            "L"
+          ]
+        ]
+      },
+      "3:7": {
+        "count": 2,
+        "sequences": [
+          [
+            "DR",
+            "CCW"
+          ]
+        ]
+      },
+      "3:8": {
+        "count": 2,
+        "sequences": [
+          [
+            "CCW",
+            "DR"
+          ]
+        ]
+      }
+    }
+  }
+}

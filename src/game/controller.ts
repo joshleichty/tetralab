@@ -3,6 +3,7 @@ import { optimalInputs } from '../engine/finesse'
 import { VISIBLE_START } from '../engine/pieces'
 import { ReplayRecorder, STEP_MS } from '../engine/replay'
 import { Match, ScriptedPressureOpponent } from '../engine/versus'
+import type { ScriptedPressureConfig } from '../engine/versus'
 import { saveReplay } from './replays'
 import { DEFAULT_ENGINE_CONFIG } from '../engine/types'
 import type { Action, Mode } from '../engine/types'
@@ -140,6 +141,7 @@ export class GameController {
       this.settings.bindings,
     )
     this.input.dispatch = (a) => this.applyAction(a)
+    this.input.onPress = (a) => this.recorder?.recordPress(this.step, a)
     this.input.onPause = () => this.togglePause()
     this.input.onRestart = () => {
       if (this.phase !== 'menu') this.start(this.mode)
@@ -224,19 +226,21 @@ export class GameController {
     if (opts.cheeseTotal) this.cheeseTotal = opts.cheeseTotal
     if (opts.battlePreset) this.battlePreset = opts.battlePreset
     const seed = (Math.random() * 0xffffffff) >>> 0
+    let opponentCfg: ScriptedPressureConfig | null = null
     if (mode === 'battle') {
       const preset = BATTLE_PRESETS[this.battlePreset]
+      opponentCfg = {
+        seed: (seed ^ 0x51f15eed) >>> 0,
+        apm: preset.apm,
+        hp: preset.hp,
+      }
       this.match = new Match(
         {
           seed,
           sdf: this.settings.sdf,
           attack: { ...DEFAULT_ENGINE_CONFIG.attack, messiness: preset.messiness },
         },
-        new ScriptedPressureOpponent({
-          seed: (seed ^ 0x51f15eed) >>> 0,
-          apm: preset.apm,
-          hp: preset.hp,
-        }),
+        new ScriptedPressureOpponent(opponentCfg),
       )
       this.engine = this.match.engine
     } else {
@@ -250,6 +254,8 @@ export class GameController {
     }
     this.attackSent = 0
     this.recorder = new ReplayRecorder(this.engine.cfg)
+    // battle playback needs the opponent's config (Replay.opponent, M6)
+    if (opponentCfg) this.recorder.setOpponent(opponentCfg)
     this.step = 0
     this.stepAcc = 0
     this.detail = emptyDetail()

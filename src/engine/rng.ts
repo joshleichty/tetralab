@@ -1,5 +1,5 @@
-import type { PieceType } from './types'
-import { PIECE_TYPES } from './pieces'
+import type { PieceType } from './types.ts'
+import { PIECE_TYPES } from './pieces.ts'
 
 /** mulberry32 — small, fast, deterministic PRNG */
 export function createRng(seed: number): () => number {

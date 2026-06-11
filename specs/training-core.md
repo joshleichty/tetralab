@@ -117,12 +117,19 @@ no DOM — a vitest harness instantiates each lesson, auto-plays each
 `guidedMove`/`challenge` solution through the engine, and asserts goals
 fire. A lesson that can't pass its own solution fails CI.
 
-### 3. Curriculum (v1 content: Tracks A–D, 24-25 lessons)
+### 3. Curriculum (v1 content: Tracks 0 + A–D, 27-28 lessons)
 
 Full extraction with board states, challenges, and sources lives in the
 research pass; summary of what ships (order mirrors the howtotetris spine —
 discipline before flash):
 
+- **Track 0 — Controls & handling (3)** *(added 2026-06-10, user-agreed:
+  the beginner on-ramp Track A assumes)*: moving pieces (move/rotate/
+  soft/hard drop, ghost, hold, preview); DAS/ARR and why settings matter
+  (doubles as an interactive handling tuner); reading the board (clears,
+  wells, what a hole costs). Skippable by construction — passing A1's
+  challenge proves it unnecessary. Same predicate discipline: every
+  lesson ends in a measurable do-it, never a "got it" button.
 - **Track A — Stacking & well discipline (6)**: flat-9 + dedicated well;
   bumpiness; don't make holes; no piece dependencies; 9-0 vs 6-3; counting
   to 4 (Tetris readiness). Sources: winternebs general/sprint, four.lol
@@ -248,7 +255,7 @@ From the codebase map — the gaps are small and precise:
 Each lands green (tests/lint/build) and is independently shippable. Cut
 from the end, never compress quality.
 
-- [ ] **M0 — Engine substrate**: setBoard, setQueue, step control,
+- [x] **M0 — Engine substrate** *(2026-06-10)*: setBoard, setQueue, step control,
   place-by-spec, board metrics, GoalSpec compiler; finesse table generator
   + JSON artifact validated against FinesseTrainer counts. Done when: all
   new APIs have vitest coverage; finesse counts match the reference table
@@ -269,10 +276,12 @@ from the end, never compress quality.
   Done when: Track A is completable end-to-end, every lesson passes the
   harness, and the player meets the quality bar in a manual design review
   (user sign-off).
-- [ ] **M4 — Tracks B, C, D**: finesse (table-driven), downstacking,
-  T-spins content. Done when: all lessons pass the harness; Track B
-  guided moves display optimal sequences from the generated table; D6
-  (Fin/Neo/Iso) explicitly cut if it can't be made immaculate.
+- [ ] **M4 — Tracks 0, B, C, D**: controls/handling on-ramp, finesse
+  (table-driven), downstacking, T-spins content. Done when: all lessons
+  pass the harness; Track B guided moves display optimal sequences from
+  the generated table; D6 (Fin/Neo/Iso) explicitly cut if it can't be
+  made immaculate. (Track 0 lands here, not M3, to keep the M3 design
+  gate focused on Track A as the flagship review content.)
 - [ ] **M5 — Progress**: finesse test mode; seed pools (cheese calibrated);
   energy curves + harmonic-mean rating + recency window; the profile page
   (badge/callout, radar, tier table) with links into Learn. Done when: a

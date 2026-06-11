@@ -7,6 +7,9 @@ import { describe, expect, it } from 'vitest'
 import { Engine } from './engine'
 import { REPLAY_VERSION, ReplayRecorder, STEP_MS, simulateReplay, type Replay } from './replay'
 import { createRng } from './rng'
+import { Match, ScriptedPressureOpponent } from './versus'
+import type { ScriptedPressureConfig } from './versus'
+import { CELL_GARBAGE, DEFAULT_ENGINE_CONFIG } from './types'
 import type { Action, EngineConfig, Mode } from './types'
 
 const ACTIONS: Action[] = [
@@ -131,5 +134,57 @@ describe('replay round-trip (D5)', () => {
     )
     const stale = { ...replay, version: REPLAY_VERSION + 1 }
     expect(() => simulateReplay(stale)).toThrow(/version/)
+  })
+})
+
+describe('battle replays (M6: opponent config makes playback self-contained)', () => {
+  /**
+   * Drive a battle the way GameController does — actions straight on the
+   * engine, then match.tick on the step grid — while recording. The
+   * scripted opponent needs no timing log: it is deterministic on the
+   * same grid, so its config is enough.
+   */
+  function playBattle(opts: { seed: number; driverSeed: number; steps: number }) {
+    const opponentCfg: ScriptedPressureConfig = {
+      seed: (opts.seed ^ 0x51f15eed) >>> 0,
+      apm: 200, // relentless pressure so garbage demonstrably enters
+      hp: 400,
+    }
+    const engineCfg = {
+      seed: opts.seed,
+      attack: { ...DEFAULT_ENGINE_CONFIG.attack, messiness: 0.5 },
+    }
+    const match = new Match(engineCfg, new ScriptedPressureOpponent(opponentCfg))
+    const live = match.engine
+    const recorder = new ReplayRecorder(live.cfg)
+    recorder.setOpponent(opponentCfg)
+    match.start()
+    const rng = createRng(opts.driverSeed)
+    let step = 0
+    for (; step < opts.steps && match.status === 'playing' && live.status === 'playing'; step++) {
+      if (rng() < 0.08) {
+        const action = ACTIONS[Math.floor(rng() * ACTIONS.length)]
+        recorder.record(step, action)
+        live.applyAction(action)
+      }
+      match.tick(STEP_MS)
+    }
+    return { live, replay: recorder.finish(live, step) }
+  }
+
+  it('round trip: opponent bursts and garbage entry land on the same steps', () => {
+    const { live, replay } = playBattle({ seed: 4242, driverSeed: 9, steps: 20_000 })
+    // the test is only meaningful if the opponent actually shaped the board
+    expect(Array.from(live.board)).toContain(CELL_GARBAGE)
+    const sim = simulateReplay(replay)
+    expectIdenticalState(live, sim)
+    expect(sim.stateHash()).toBe(live.stateHash())
+    expect(sim.pendingGarbage()).toBe(live.pendingGarbage())
+  })
+
+  it('refuses a battle replay recorded without its opponent (pre-M6)', () => {
+    const { replay } = playBattle({ seed: 1, driverSeed: 2, steps: 500 })
+    const stripped = { ...replay, opponent: undefined }
+    expect(() => simulateReplay(stripped)).toThrow(/opponent/)
   })
 })

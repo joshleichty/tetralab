@@ -1,6 +1,6 @@
-import { BOARD_W, CELLS, spawnX } from './pieces'
-import { kicksFor } from './srs'
-import type { PieceType, Rot } from './types'
+import { BOARD_W, CELLS, spawnX } from './pieces.ts'
+import { kicksFor } from './srs.ts'
+import type { PieceType, Rot } from './types.ts'
 
 /**
  * Finesse: the minimal number of keypresses to reach a placement from

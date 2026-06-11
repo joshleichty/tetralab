@@ -236,3 +236,72 @@ visible, HP panel/stats render.
 
 **Open threads**: garbage meter color states deferred (above) · battle
 replays don't capture opponent timing (M6 lockstep owns that design).
+
+## 2026-06-10 — M5 closed: feel sign-off received
+
+**This session**: human gate cleared — user played battle mode and signed
+off on the feel ("it feels great"): presets, garbage meter / HP bar, and
+soundscape accepted as shipped. No code changes.
+
+**Next**: per `specs/feature-parity.md`, remaining phases are M6 (online
+1v1 lockstep — owns the battle-replay opponent-timing design) and the
+design pass.
+
+## 2026-06-10 — M6 part 1: lockstep netcode core (headless) + battle-replay fidelity
+
+**This session (runner M6, first half)**: the spec-mandated headless
+foundation, in-memory-first — `src/net/` is new, plus the battle-replay
+design M6 owned. Full design rationale in **docs/netcode.md** (new).
+
+- **`src/net/transport.ts`**: `Transport` seam + `FakeNetwork` — seeded,
+  injectable-time pair with scriptable latency/jitter/drop, mid-flight
+  condition changes, JSON round-trip serialization enforcement.
+- **`src/net/lockstep.ts`**: `LockstepSession` — both engines simulated
+  locally, only `(step, action)` streams cross the wire. Keystone rule:
+  attack emitted at step `s` enters the opponent at `s + attackDelaySteps`
+  (default 500 ms); the delay doubles as the lockstep horizon, so local
+  input has zero added latency and lag spikes stall (then resume) rather
+  than desync. Canonical per-step order (garbage → actions → tick →
+  schedule). Drop/reorder-proof protocol: every packet resends the whole
+  unacked window; acks piggyback; flushing runs on tick time so mutual
+  stalls can't deadlock. Desync = periodic `Engine.stateHash()` exchange
+  (new engine method, timers included), verified against the local
+  re-simulation; one `desync` packet ends both sides. Outcomes (won/lost/
+  draw) compare re-derived death steps — no referee.
+- **Match replays**: online `MatchReplay` = both streams + match config;
+  `simulateMatchReplay` re-runs the pure synchronous two-engine core
+  (the determinism theorem as code) and reproduces both boards bit-exactly.
+  Scripted-battle replays fixed per the M4/M5 open thread: `Replay.opponent`
+  (config suffices — the opponent is grid-deterministic); playback drives a
+  `Match` mirroring the controller exactly; pre-M6 battle replays refused.
+- **Tests** (+25; 230 green tree-wide): full bot-vs-bot matches over the
+  fake network — outcome invariance across perfect/lossy/jittery links,
+  50% drop convergence, exact attack-delay arrival, horizon stall/ratchet/
+  recovery, stall input-freeze, corrupted-board desync detection within ~2
+  hash periods, draw on identical deaths, replay round-trips both views,
+  stateHash sensitivity (timers, pending-attack partition, single cell).
+
+**Decisions** (mine, flagged for review): attack delay 100 steps = 500 ms
+(netcode tuning constant, not a parity row) · per-player SDF exchanged at
+handshake, fixed mid-match · shared match seed (same bags) · stalls drop
+input (classic lockstep) · winner keeps simulating loser to the final board.
+
+**Concurrency note**: bot + pedagogy streams worked this tree in parallel
+this session (engine gained `fits`/`spin.ts`/`snapshot`/lesson mode under
+me); `stateHash` and netcode sit cleanly on their refactor; joint tree
+green. `Engine.stateHash` tests live in `src/net/lockstep.test.ts` to
+avoid touching `engine.test.ts` mid-flight — relocate if it ever matters.
+
+**Open threads (next M6 session, in order — see docs/netcode.md §still-to-build)**:
+WebRTC DataChannel transport · Vercel serverless + KV polling signaling ·
+room flow (invite URL, nickname, handshake, countdown sync, rematch) ·
+duel-view UI + garbage-meter wind-up states + stall/desync surfaces ·
+match-replay persistence · disconnect timeouts (room layer). Controller
+must dispatch input via the session's `onStep` hook and block SDF edits
+mid-match.
+
+**Cross-stream flags**: `MatchReplay` (src/net/lockstep.ts) is the versus
+format pedagogy Review / bot analysis should consume · `Engine.stateHash()`
+is available as a cheap whole-state identity assert for any stream's tests ·
+solo `Replay` gained optional `opponent` (additive; `REPLAY_VERSION`
+unchanged — engine rules untouched).

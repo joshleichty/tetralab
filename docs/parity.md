@@ -180,9 +180,9 @@ from tetr.io source).
 | Survival (rising garbage) | ✓ | baseline | [JS] parity |
 | Marathon | ✓ | baseline | D3 implemented in M1: ends at level 15 as a win |
 | Zen / endless chill | ✗ | out→pedagogy | Mode carving belongs to pedagogy stream |
-| Battle (vs scripted pressure) | △ | baseline | M4 substrate + M5 UI (garbage meter, opponent HP, APM, casual/steady/fierce presets, per-preset PBs). **Feel sign-off pending** (human gate) |
-| Online 1v1 (invite link) | ✗ | baseline | Spec Phase 4 |
-| Replays (record/playback) | △ | baseline | D5 implemented in M2: every finished game records `{version, config+seed, fixed-step action log}` (`src/engine/replay.ts`, persisted via `tetra.replays.v1`, round-trip-tested headlessly). Viewer deliberately deferred to the pedagogy Review surface |
+| Battle (vs scripted pressure) | ✓ | baseline | M4 substrate + M5 UI (garbage meter, opponent HP, APM, casual/steady/fierce presets, per-preset PBs). Feel signed off 2026-06-10 |
+| Online 1v1 (invite link) | △ | baseline | M6 core landed headless (`src/net/`, docs/netcode.md): lockstep sessions, attack-delay horizon, `Transport` + in-memory fake, hash-based desync detection, match replays — full matches under latency/jitter/drop tested in vitest. WebRTC transport, signaling, room flow + duel UI remain |
+| Replays (record/playback) | △ | baseline | D5 implemented in M2: every finished game records `{version, config+seed, fixed-step action log}` (`src/engine/replay.ts`, persisted via `tetra.replays.v1`, round-trip-tested headlessly). M6 added battle-replay fidelity (`Replay.opponent`) and the online `MatchReplay` format (docs/netcode.md). Viewer deliberately deferred to the pedagogy Review surface |
 
 ## 12. Decisions (resolved with user, 2026-06-09)
 

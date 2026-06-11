@@ -51,6 +51,12 @@ export class InputHandler {
 
   /** engine action sink — set by the game loop */
   dispatch: (a: Action) => void = () => {}
+  /**
+   * fires once per physical gameplay keydown (exactly when `keypresses`
+   * increments) with the engine action it maps to — no DAS/ARR repeats.
+   * The replay press log (stats fidelity) hangs off this.
+   */
+  onPress: (a: Action) => void = () => {}
   onPause: () => void = () => {}
   onRestart: () => void = () => {}
   /** when false, taps/DAS still charge but no actions are dispatched (countdown) */
@@ -140,7 +146,10 @@ export class InputHandler {
     const action = this.actionFor(code)
     if (!action || this.held.has(code)) return
     this.held.add(code)
-    if (action !== 'pause' && action !== 'restart') this.keypresses++
+    if (action !== 'pause' && action !== 'restart') {
+      this.keypresses++
+      this.onPress(action === 'softDrop' ? 'softDropOn' : action)
+    }
 
     switch (action) {
       case 'left':

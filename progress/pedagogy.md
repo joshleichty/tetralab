@@ -5,6 +5,70 @@ See WORKSTREAMS.md for the stream's place in the whole.
 
 ---
 
+## 2026-06-10 — M0 done: engine substrate; Track 0 agreed
+
+**This session**: executed `specs/training-core.md` M0. All landed in
+`src/engine/`, pure and headless, 192 tests green (was 126):
+
+- **`lesson` mode** (new `Mode`): zero gravity, no lock timer, no win
+  condition — pieces lock only via `hardDrop`/`place()`; soft drop still
+  works. The lesson runtime, not the clock, drives the game.
+- **`setBoard(rows | Uint8Array)`** — bottom-aligned row-string boards
+  (`'XXXX___XXX'`, parsed in new `board.ts`); throws on malformed input.
+- **`setQueue(pieces)`** — scripted queue; seeded bag resumes after.
+- **`place({type, rot, x})`** — placement-by-spec: straight drop from the
+  top, pulls via hold when needed, returns false (state untouched) when
+  unreachable. *Limitation by design: can't express kicks/tucks — T-spin
+  demo steps (Track D) must script raw actions instead; M2 should plan
+  for that.*
+- **`board.ts` metrics**: columnHeights, stackHeight, holes, bumpiness
+  (optional well-column exclusion), wellDepth, isWellPure.
+- **`goals.ts`**: `GoalSpec` → `compileGoal(spec, engine)` evaluators
+  (noNewHoles / clearLines / maxBumpiness / wellPure), observing drained
+  events; gameover fails any pending goal.
+- **Finesse sequence table** (`finesse-gen.ts` → `data/finesse-table.json`
+  → `finesse-table.ts` loader, `npm run gen:finesse` runs on plain Node
+  via type stripping): all-shortest-paths BFS, no-180 community standard,
+  every minimal sequence per placement. Validated three ways: artifact ↔
+  generator equality (CI catches stale artifact), **counts match the
+  FinesseTrainer reference for all pieces × rotations × columns** (~160
+  checks; their semantics — movement presses only, rotations free, DAS =
+  one press — transcribed from finesseTrainer.js into the test), and
+  every sequence executed through the real engine locks its claimed
+  placement.
+
+**Decisions**:
+- Primary finesse table excludes 180 (community standard); the client
+  stream's `finesse.ts optimalInputs` *includes* 180 and stays untouched
+  — its KPP/fault grading is therefore stricter than the teaching table.
+  Flagging rather than unifying: client stream should decide which
+  standard summary-screen fault counts use.
+- Track 0 — Controls & handling (3 lessons, beginner on-ramp) added to
+  the spec (user-agreed this session), shipping in M4; v1 is now ~28
+  lessons. Open design threads for M3 from the same discussion:
+  challenge strictness (community numbers vs tiered) and caption voice.
+
+**Cross-stream flags**:
+- **Engine API additions** (above) are deliberately bot-usable: board
+  metrics are evaluation features; `place()` is candidate application;
+  GoalSpecs are future reward components. Bot stream's new `Position`
+  snapshot/`spin.ts`/`fits()` landed mid-session in the same files —
+  merged cleanly, `place()`/`canFit` now share its `fits()` helper.
+- `tsconfig.app.json` gained `resolveJsonModule` (finesse artifact import).
+- **Repo lint is not green** at session end: one pre-existing error in
+  `src/net/transport.ts` (client stream's in-flight M6 work, uncommitted)
+  — not touched from this lane. Tests and build are green.
+
+**Open threads**:
+- M1 next: the client stream already built recording/playback
+  (`replay.ts`), so M1 reduces to the derived-stats layer (KPP, faults
+  vs the new table, holes/roughness timelines, downstack efficiency) +
+  persistence cap; CLI-callable first.
+- Spec's M1 prose still describes the pre-replay codebase — read
+  `docs/engine.md` replay section first.
+
+---
+
 ## 2026-06-09 — Training-core spec (interview + research)
 
 **This session**: extended interview filtered the training product down to

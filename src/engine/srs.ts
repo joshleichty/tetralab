@@ -1,4 +1,4 @@
-import type { PieceType, Rot } from './types'
+import type { PieceType, Rot } from './types.ts'
 
 /**
  * SRS wall-kick tables, expressed in *screen* coordinates (y grows downward),

@@ -2,8 +2,8 @@
  * Core engine types. The engine is pure TypeScript with zero DOM
  * dependencies so it can be driven headlessly (RL training, replays, tests).
  */
-import type { AttackConfig } from './attack'
-import { DEFAULT_ATTACK_CONFIG } from './attack'
+import type { AttackConfig } from './attack.ts'
+import { DEFAULT_ATTACK_CONFIG } from './attack.ts'
 
 export type PieceType = 'I' | 'O' | 'T' | 'S' | 'Z' | 'J' | 'L'
 
@@ -22,7 +22,12 @@ export interface ActivePiece {
 export const CELL_EMPTY = 0
 export const CELL_GARBAGE = 8
 
-export type Mode = 'marathon' | 'sprint' | 'blitz' | 'cheese' | 'survival' | 'battle'
+/**
+ * `lesson` is the pedagogy substrate: no gravity, no lock timer (pieces
+ * lock only on hard drop / `place()`), no win condition — the lesson
+ * runtime, not the clock, drives the game forward.
+ */
+export type Mode = 'marathon' | 'sprint' | 'blitz' | 'cheese' | 'survival' | 'battle' | 'lesson'
 
 export type GameStatus = 'ready' | 'playing' | 'over' | 'won'
 
@@ -100,6 +105,21 @@ export const DEFAULT_ENGINE_CONFIG: Omit<EngineConfig, 'seed' | 'mode'> = {
   riseDecayMs: 120,
   riseMinMs: 1800,
   attack: DEFAULT_ATTACK_CONFIG,
+}
+
+/**
+ * Plain-value snapshot of the decision-relevant state — the bot layer's
+ * L0 input (specs/bot-core.md). Always a copy, never an alias of live
+ * engine state; positions can also be built from replays or fixtures.
+ */
+export interface Position {
+  board: Uint8Array
+  /** the piece to place */
+  piece: PieceType
+  /** visible previews (cfg.queueSize) */
+  queue: PieceType[]
+  hold: PieceType | null
+  holdUsed: boolean
 }
 
 /** Discrete actions — the exact surface an RL agent will use. */

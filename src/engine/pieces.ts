@@ -1,4 +1,4 @@
-import type { PieceType, Rot } from './types'
+import type { PieceType, Rot } from './types.ts'
 
 export const BOARD_W = 10
 /** total rows including hidden buffer; rows [VISIBLE_START, BOARD_H) are visible */
@@ -114,4 +114,19 @@ export const SPAWN_Y = VISIBLE_START - 2
 
 export function cellsAt(type: PieceType, rot: Rot, x: number, y: number): Array<[number, number]> {
   return CELLS[type][rot].map(([dx, dy]) => [x + dx, y + dy])
+}
+
+/**
+ * Pure collision test: can `type` at `rot` sit with its bounding-box
+ * origin at (x, y) on this board? `Engine.canFit` delegates here; the bot
+ * layer's enumerator calls it directly (board as argument, no instance).
+ */
+export function fits(board: Uint8Array, type: PieceType, rot: Rot, x: number, y: number): boolean {
+  for (const [dx, dy] of CELLS[type][rot]) {
+    const cx = x + dx
+    const cy = y + dy
+    if (cx < 0 || cx >= BOARD_W || cy < 0 || cy >= BOARD_H) return false
+    if (board[cy * BOARD_W + cx] !== 0) return false
+  }
+  return true
 }

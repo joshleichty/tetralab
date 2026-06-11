@@ -1,6 +1,6 @@
-import { Engine } from './engine'
-import { createRng } from './rng'
-import type { EngineConfig, GameEvent } from './types'
+import { Engine } from './engine.ts'
+import { createRng } from './rng.ts'
+import type { EngineConfig, GameEvent } from './types.ts'
 
 /**
  * Versus substrate (spec Phase 2) — pure and headless. The match layer

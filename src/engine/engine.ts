@@ -6,9 +6,10 @@ import type {
   GameStatus,
   Mode,
   PieceType,
+  Position,
   Rot,
-} from './types'
-import { CELL_GARBAGE, DEFAULT_ENGINE_CONFIG, INSTANT_SDF } from './types'
+} from './types.ts'
+import { CELL_GARBAGE, DEFAULT_ENGINE_CONFIG, INSTANT_SDF } from './types.ts'
 import {
   BOARD_H,
   BOARD_W,
@@ -16,11 +17,14 @@ import {
   SPAWN_Y,
   VISIBLE_START,
   cellsAt,
+  fits,
   spawnX,
-} from './pieces'
-import { kicksFor } from './srs'
-import { SevenBag, createRng } from './rng'
-import { attackFor } from './attack'
+} from './pieces.ts'
+import { kicksFor } from './srs.ts'
+import { detectTSpin as tSpin3Corner } from './spin.ts'
+import { SevenBag, createRng } from './rng.ts'
+import { attackFor } from './attack.ts'
+import { parseRows } from './board.ts'
 
 const CLEAR_POINTS = [0, 100, 300, 500, 800]
 const TSPIN_POINTS = [400, 800, 1200, 1600]
@@ -95,6 +99,10 @@ export class Engine {
     this.riseInterval = this.cfg.riseStartMs
     this.riseTimer = this.cfg.riseStartMs
     if (this.cfg.mode === 'cheese') this.cheesePool = this.cfg.cheeseTotal
+    this.fillQueue()
+  }
+
+  private fillQueue() {
     while (this.queue.length < this.cfg.queueSize + 1) this.queue.push(this.bag.next())
   }
 
@@ -169,9 +177,13 @@ export class Engine {
     }
 
     const grounded = !this.canFit(this.active.x, this.active.y + 1, this.active.rot)
+    // lesson mode: time passes (elapsed, soft drop) but exerts no pressure —
+    // no gravity, no lock timer; only hardDrop/place() lock a piece
+    const zeroG = this.cfg.mode === 'lesson'
 
     if (grounded) {
       this.gravityAcc = 0
+      if (zeroG) return
       // post-cap: once all lock-delay resets are spent, the piece locks
       // immediately on touching a surface instead of running the timer
       if (this.lockResets >= this.cfg.maxLockResets) {
@@ -190,6 +202,8 @@ export class Engine {
         this.score += dropped
         this.events.push({ kind: 'softdrop' })
       }
+    } else if (zeroG && !this.softDropping) {
+      this.gravityAcc = 0
     } else {
       const msPerRow = gravityMsPerRow(this.level) / (this.softDropping ? this.cfg.sdf : 1)
       this.gravityAcc += dtMs
@@ -303,11 +317,84 @@ export class Engine {
   canFit(x: number, y: number, rot: Rot): boolean {
     const p = this.active
     if (!p) return false
-    for (const [cx, cy] of cellsAt(p.type, rot, x, y)) {
-      if (cx < 0 || cx >= BOARD_W || cy < 0 || cy >= BOARD_H) return false
-      if (this.board[cy * BOARD_W + cx] !== 0) return false
+    return this.pieceFits(p.type, rot, x, y)
+  }
+
+  private pieceFits(type: PieceType, rot: Rot, x: number, y: number): boolean {
+    return fits(this.board, type, rot, x, y)
+  }
+
+  /**
+   * Plain-value copy of the decision-relevant state (bot layer L0,
+   * specs/bot-core.md); null unless a piece is active.
+   */
+  snapshot(): Position | null {
+    const p = this.active
+    if (!p) return null
+    return {
+      board: this.board.slice(),
+      piece: p.type,
+      queue: this.queue.slice(0, this.cfg.queueSize),
+      hold: this.hold,
+      holdUsed: this.holdUsed,
     }
-    return true
+  }
+
+  /**
+   * FNV-1a fingerprint of the complete simulation state, private timers
+   * included: two engines hash equal iff they evolve identically under the
+   * same future actions and ticks. Lockstep desync detection (src/net/)
+   * and replay verification stand on this.
+   */
+  stateHash(): number {
+    let h = 0x811c9dc5
+    const mix = (b: number) => {
+      h = Math.imul(h ^ (b & 0xff), 0x01000193) >>> 0
+    }
+    const mixInt = (n: number) => {
+      mix(n)
+      mix(n >>> 8)
+      mix(n >>> 16)
+      mix(n >>> 24)
+    }
+    const view = new DataView(new ArrayBuffer(8))
+    const mixNum = (n: number) => {
+      view.setFloat64(0, n)
+      mixInt(view.getUint32(0))
+      mixInt(view.getUint32(4))
+    }
+    for (let i = 0; i < this.board.length; i++) mix(this.board[i])
+    const p = this.active
+    mixInt(p ? PIECE_CELL[p.type] : -1)
+    mixInt(p ? p.rot : -1)
+    mixInt(p ? p.x : 0)
+    mixInt(p ? p.y : 0)
+    mixInt(this.queue.length)
+    for (const t of this.queue) mix(PIECE_CELL[t])
+    mixInt(this.hold ? PIECE_CELL[this.hold] : -1)
+    mix(this.holdUsed ? 1 : 0)
+    for (let i = 0; i < this.status.length; i++) mix(this.status.charCodeAt(i))
+    mixNum(this.score)
+    mixInt(this.lines)
+    mixInt(this.level)
+    mixInt(this.combo)
+    mixInt(this.b2b)
+    mixInt(this.piecesPlaced)
+    mixNum(this.elapsed)
+    mixInt(this.pendingAttacks.length)
+    for (const a of this.pendingAttacks) mixInt(a)
+    mix(this.softDropping ? 1 : 0)
+    mixNum(this.gravityAcc)
+    mixNum(this.lockTimer)
+    mixInt(this.lockResets)
+    mixInt(this.lowestY)
+    mix(this.lastMoveWasRotation ? 1 : 0)
+    mixInt(this.lastKickIndex)
+    mixInt(this.lastHole)
+    mixInt(this.cheesePool)
+    mixNum(this.riseTimer)
+    mixNum(this.riseInterval)
+    return h
   }
 
   // ── locking & clearing ─────────────────────────────────────────
@@ -389,36 +476,11 @@ export class Engine {
     this.events.push({ kind: 'garbage', rows: total })
   }
 
-  /**
-   * 3-corner T-spin rule. Mini unless both front corners (relative to the
-   * T's point) are filled, or the rotation used the final (1,2) SRS kick.
-   */
+  /** 3-corner T-spin rule; the pure implementation lives in spin.ts */
   private detectTSpin(): 'none' | 'mini' | 'full' {
     const p = this.active
-    if (!p || p.type !== 'T' || !this.lastMoveWasRotation) return 'none'
-    const occupied = (x: number, y: number) =>
-      x < 0 || x >= BOARD_W || y < 0 || y >= BOARD_H || this.board[y * BOARD_W + x] !== 0
-
-    const corners = [
-      occupied(p.x, p.y), // top-left
-      occupied(p.x + 2, p.y), // top-right
-      occupied(p.x + 2, p.y + 2), // bottom-right
-      occupied(p.x, p.y + 2), // bottom-left
-    ]
-    const filled = corners.filter(Boolean).length
-    if (filled < 3) return 'none'
-
-    // front corner pairs by rotation: 0=top, 1=right, 2=bottom, 3=left
-    const FRONT: Record<Rot, [number, number]> = {
-      0: [0, 1],
-      1: [1, 2],
-      2: [2, 3],
-      3: [3, 0],
-    }
-    const [a, b] = FRONT[p.rot]
-    const frontFilled = corners[a] && corners[b]
-    if (frontFilled || this.lastKickIndex === 4) return 'full'
-    return 'mini'
+    if (!p || p.type !== 'T') return 'none'
+    return tSpin3Corner(this.board, p, this.lastMoveWasRotation, this.lastKickIndex)
   }
 
   private clearLines(tspin: 'none' | 'mini' | 'full') {
@@ -573,7 +635,7 @@ export class Engine {
 
   private nextFromQueue(): PieceType {
     const t = this.queue.shift()!
-    this.queue.push(this.bag.next())
+    this.fillQueue() // no-op while a scripted queue (setQueue) is longer than the preview
     return t
   }
 
@@ -583,6 +645,69 @@ export class Engine {
   }
 
   // ── training hooks ─────────────────────────────────────────────
+
+  /**
+   * Load an arbitrary board state: bottom-aligned row strings
+   * (`'LLL_______'`, see board.ts) or a full flat array. Replaces the
+   * whole board; lifts the active piece clear if it now overlaps.
+   * Throws on malformed input — lesson authoring errors should fail loudly.
+   */
+  setBoard(rows: string[] | Uint8Array) {
+    let next: Uint8Array
+    if (rows instanceof Uint8Array) {
+      if (rows.length !== BOARD_W * BOARD_H) {
+        throw new Error(`board array has ${rows.length} cells (want ${BOARD_W * BOARD_H})`)
+      }
+      for (const v of rows) {
+        if (v > CELL_GARBAGE) throw new Error(`bad cell value ${v}`)
+      }
+      next = rows
+    } else {
+      next = parseRows(rows)
+    }
+    this.board.set(next)
+    if (this.active) this.liftActive()
+  }
+
+  /**
+   * Script the upcoming pieces, replacing the current preview; the seeded
+   * bag resumes once the scripted run is exhausted. Affects pieces not yet
+   * spawned — call before `start()` to control the first piece.
+   */
+  setQueue(pieces: PieceType[]) {
+    if (pieces.length === 0) throw new Error('setQueue needs at least one piece')
+    this.queue = [...pieces]
+    this.fillQueue()
+  }
+
+  /**
+   * Apply a placement by spec: drop `type` straight down at (rot, x) and
+   * lock it — the primitive for demo scripts and lesson auto-verification.
+   * Uses the active piece, or pulls the type via hold when that yields it.
+   * Returns false (state untouched) if the piece isn't available or the
+   * placement isn't reachable by a straight drop from the board top —
+   * placements that need kicks or tucks must be scripted as actions.
+   */
+  place(spec: { type: PieceType; rot: Rot; x: number }): boolean {
+    if (this.status !== 'playing' || !this.active) return false
+    let minDy = 4
+    for (const [, dy] of cellsAt(spec.type, spec.rot, 0, 0)) minDy = Math.min(minDy, dy)
+    let y = -minDy // topmost in-bounds position
+    if (!this.pieceFits(spec.type, spec.rot, spec.x, y)) return false
+
+    if (this.active.type !== spec.type) {
+      const viaHold = !this.holdUsed && (this.hold ?? this.queue[0]) === spec.type
+      if (!viaHold) return false
+      this.doHold()
+      if (!this.active || (this.active as ActivePiece).type !== spec.type) return false
+    }
+
+    while (this.pieceFits(spec.type, spec.rot, spec.x, y + 1)) y++
+    this.active = { type: spec.type, rot: spec.rot, x: spec.x, y }
+    this.lastMoveWasRotation = false
+    this.lockPiece()
+    return true
+  }
 
   /**
    * Push garbage rows in from the bottom, all sharing one hole column

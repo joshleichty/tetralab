@@ -5,6 +5,114 @@ See WORKSTREAMS.md for the stream's place in the whole.
 
 ---
 
+## 2026-06-10 — bot-core M1+M2 shipped: the enumerator + pathfinder exist
+
+**This session** (continuation of the M0 session): `src/bot/` is born —
+`types.ts` (Placement/InputPlan/PlanStep), `position.ts`
+(`positionFromRows` fixture builder), `enumerate.ts` (L1: BFS over
+(rot, x, y) with the engine's exact spawn rules/kick loop/spin rule;
+per-edge candidate emission so slide-in 'none' and rotate-in 'full' at
+identical cells stay distinct), `path.ts` (L2: `planFor` readback from
+the same BFS), `execute.ts` (the canonical executor on the `STEP_MS`
+grid; `sonicDrop` = softDropOn → tick to floor → softDropOff).
+19 tests in `bot.test.ts`, green on first run.
+
+**Verified properties** (the spec's core claim — no mocked physics):
+empty-board counts 34/17/9 per piece, all hard-drop-only; TSD chamber
+found as spin-full + executes to the engine's own `T-SPIN DOUBLE`; the
+kick-only TST (SRS kick index 4) found + executes to `T-SPIN TRIPLE`;
+I-tuck under a ledge (`hardDropOnly: false`) + its rest-on-top twin
+(`true`); hold enumeration (plans prefixed `hold`, skipped when used or
+same-piece); determinism; round-trips across random marathon/cheese
+walks and an exhaustive mid-game candidate sweep.
+
+**Decisions**: plans assume inputs-faster-than-gravity (stated in
+enumerate.ts header; executor ticks 5ms/step, level-1 gravity is
+~1000ms/row) — high-gravity live driving is an L6 driver concern, not a
+plan concern. `searchPiece` is exported for L3+ (eval wants candidates
+*with* plans without re-searching). No memoization yet — searches are
+sub-ms; add it when `suggest()` exists.
+
+**Open threads**: M3 remains — CLI demo, perf ceiling assert, corpus
+expansion (survival-rise boards), `docs/bot.md`. Mini-spin fixture
+(T-spin mini label agreement) worth adding to the M3 corpus. The
+concurrent client-stream lockstep work has 1 failing test + 1 lint error
+in `src/net/` at time of writing — theirs, in flight, not touched here.
+
+## 2026-06-10 — bot-core M0 shipped (shared substrate)
+
+**This session** (same session as the foundations interview below — M0 was
+small enough to execute directly): pure `fits(board, type, rot, x, y)` in
+`pieces.ts`; pure 3-corner T-spin rule in new `spin.ts`; `Position` type
+in `types.ts` + `Engine.snapshot()`. Engine delegates everywhere (`canFit`
+→ `pieceFits` → `fits`; `detectTSpin` → `spin.ts`) — no behavior change,
+`REPLAY_VERSION` untouched. Direct unit tests in
+`src/engine/substrate.test.ts` (13 tests); full suite 139 green.
+
+**Cross-stream flags** (engine ground, concurrent with pedagogy's
+training-core M0 which landed `board.ts`/`goals.ts`/`setBoard`/`setQueue`/
+`place()`/lesson mode in the same working tree):
+- Their private `Engine.pieceFits` now delegates to the pure `fits` —
+  one collision implementation in the codebase; metrics in their
+  `board.ts` are exactly the L3 feature primitives the bot stream will
+  consume later, as their header comment anticipates.
+- Fixed a broken import in their `board.ts` (`PIECE_CELL` from `./types`
+  → `./pieces`; it failed all 6 engine test files at runtime) and
+  converted `goals.ts` constructor parameter properties to explicit
+  fields (TS1294 under `erasableSyntaxOnly`; broke the build). Both
+  mechanical, semantics-preserving fixes, flagged here rather than
+  asked-first because they blocked the shared suite/build.
+- Working-tree note: three streams were editing concurrently this
+  session (bot, pedagogy training-core, client net/lockstep);
+  transient red states belonged to in-flight edits, not landed work.
+  Green-at-session-end is per-stream best-effort under tandem editing.
+- `spin.ts` is the one true T-spin rule: anyone touching spin detection
+  edits the pure function, not the engine.
+
+**Next**: bot-core M1 (the enumerator) in a fresh session.
+
+## 2026-06-10 — Foundations interview → `specs/bot-core.md` (L0–L2)
+
+**This session**: No code. Extended foundations interview with the user
+(architecture, abstraction level, use cases, human-likeness, LLM role),
+then wrote `specs/bot-core.md` — the first build spec, scoped to
+Position (L0) + placement enumerator (L1) + placement→keypress
+pathfinder (L2). Execute it milestone-by-milestone in fresh sessions.
+
+**Decisions agreed** (recorded in the spec's layer map; don't relitigate):
+- The bot stream builds tetra's **intelligence layer**: a queryable
+  6-layer stack (Position → enumerate → path → eval → detectors →
+  policy → drivers) consumed via four query shapes (suggest / analyze /
+  play / generate) by ~22 use cases inventoried in-session.
+- **Placements are the native unit**; one pathfinder translates down to
+  keypresses. Everything above L2 is data-parameterized: strategies,
+  difficulty tiers, mode objectives = weight profiles + gates, i.e.
+  content, not architecture.
+- **Heuristic-first with search depth as a dial** — human-facing bots
+  default shallow (current piece + 1 preview, gated feature vocabulary:
+  how humans actually play per the research); the deeper searcher is an
+  offline grading/mining oracle only. Deep RL + learned human-likeness
+  stay deferred; Cold Clear WASM remains the L5 fallback oracle.
+- **LLM (user raised, then deferred)**: if it ever lands, it sits *above*
+  the layer narrating detector facts — never below it making judgments.
+  Strengthens the case for the interpretable core; nothing to build now.
+- "Good move" is always **board + explicit frame** (mode × declared
+  technique × player level); the bot never grades against an undeclared
+  objective.
+
+**Cross-stream flags**: the spec's M0 touches shared engine ground —
+extract pure `fits()` (collision) and pure 3-corner T-spin detection
+(engine delegates; no behavior change, `REPLAY_VERSION` untouched), add
+`Engine.snapshot()`. pedagogy's training-core M0 (place-by-spec, board
+metrics, GoalSpec) is explicitly out of scope here; possible later dedup
+of board primitives noted in both specs' lanes. `finesse.ts` unchanged —
+the enumerator cross-validates against it on empty boards.
+
+**Open threads**: L3 feature set + portable weights (Dellacherie/BCTS/
+Cold Clear) is the next spec after bot-core ships; visuals
+(reachability/candidate ghosts) are a cheap consumer once L1 exists —
+park in IDEAS.md territory until a UI stream wants it.
+
 ## 2026-06-09 — Bot/engine substrate research executed
 
 **This session**: Executed `specs/bot-engine-research.md` — six parallel
