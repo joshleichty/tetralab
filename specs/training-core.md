@@ -260,15 +260,17 @@ from the end, never compress quality.
   + JSON artifact validated against FinesseTrainer counts. Done when: all
   new APIs have vitest coverage; finesse counts match the reference table
   for all 7 pieces × rotations × columns.
-- [ ] **M1 — Replays**: Replay format, always-on recorder, headless
-  resimulation producing per-piece stats (KPP, faults, holes, roughness,
-  downstack efficiency); localStorage persistence with cap. Done when: a
-  recorded game resimulates to an identical final state (asserted in
-  tests) and stats are CLI-derivable from a stored replay.
-- [ ] **M2 — Lesson runtime (headless)**: Step types, lesson state machine
-  (gating, hint/reveal, progress), fumen import, annotation model; the
-  vitest lesson-validation harness. Done when: a sample lesson of all six
-  step kinds passes the harness with zero React imported.
+- [x] **M1 — Replays** *(2026-06-10; format/recorder/persistence had
+  already landed via the client stream — this milestone delivered the
+  stats layer + press-log fidelity)*: Replay format, always-on recorder,
+  headless resimulation producing per-piece stats (KPP, faults, holes,
+  roughness, downstack efficiency); localStorage persistence with cap.
+  Done when: a recorded game resimulates to an identical final state
+  (asserted in tests) and stats are CLI-derivable from a stored replay.
+- [x] **M2 — Lesson runtime (headless)** *(2026-06-10)*: Step types, lesson
+  state machine (gating, hint/reveal, progress), fumen import, annotation
+  model; the vitest lesson-validation harness. Done when: a sample lesson
+  of all six step kinds passes the harness with zero React imported.
 - [ ] **M3 — Lesson player UI + Track A**: the flagship surface — card
   grammar, board annotations, feedback choreography, track/lesson
   navigation, progress persistence; Track A's 6 stacking lessons authored

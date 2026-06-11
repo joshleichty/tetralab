@@ -27,9 +27,10 @@ substrate for the RL training mode.
   (`npm run gen:finesse`); cross-validated against FinesseTrainer counts
   and executed through the engine in tests
 - `board.ts` — board specs + metrics: `parseRows` (row-string boards,
-  `'XXXX___XXX'`), `holes`, `bumpiness`, `wellDepth`, `isWellPure`,
-  `columnHeights`, `stackHeight` — GoalSpec substrate and bot evaluation
-  features
+  `'XXXX___XXX'`), `holes`, `playerHoles` (covered by a piece, not
+  garbage — cheese terrain doesn't count), `bumpiness`, `wellDepth`,
+  `isWellPure`, `columnHeights`, `stackHeight` — GoalSpec substrate and
+  bot evaluation features
 - `goals.ts` — `GoalSpec` → `compileGoal(spec, engine)`: declarative
   lesson-challenge goals (noNewHoles, clearLines, maxBumpiness, wellPure)
   evaluated over state + events; future RL reward components
@@ -39,7 +40,16 @@ substrate for the RL training mode.
   `Replay.opponent` (the scripted opponent's config — deterministic on the
   grid, so no timing log) and play back through a `Match`; battle replays
   recorded before M6 lack it and are refused. Online match replays live in
-  `src/net/lockstep.ts` (`MatchReplay`: both action streams + match config)
+  `src/net/lockstep.ts` (`MatchReplay`: both action streams + match config).
+  `Replay.presses` logs physical keydowns (no DAS/ARR repeats; optional,
+  never used in playback) — the input-fidelity layer for derived stats
+- `stats.ts` — `analyzeReplay(replay)` (training-core §4): instrumented
+  resimulation → per-piece + aggregate stats (KPP, finesse faults vs the
+  no-180 table — 180-aware when the player pressed 180 —, player-made
+  holes via `board.ts playerHoles`, roughness timeline, cheese
+  blocks/100L) plus a `verified` flag checking the resimulated outcome
+  against the recorded summary. CLI: `node scripts/replay-stats.ts
+  <replay.json> [--index n] [--json]`
 - `engine.test.ts` — vitest coverage; must stay green
 - `parity.test.ts` — the parity suite: encodes docs/parity.md §1–4 with
   per-test source citations; the coverage contract
@@ -122,5 +132,8 @@ Mechanics follow the guideline/modern-client baseline per `docs/parity.md`
   stamped with step indices. Replays and lockstep netcode (`src/net/`,
   docs/netcode.md) both stand on this — don't reintroduce variable-dt
   ticking.
+- Engine-internal imports carry explicit `.ts` extensions so the whole
+  chain runs under plain Node via type stripping (CLIs in `scripts/`
+  need no bundler) — keep new engine modules extension-clean.
 - `window.__tetra` exposes the live `GameController` in the browser for
   in-page scripting/debugging.

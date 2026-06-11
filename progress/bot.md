@@ -5,6 +5,109 @@ See WORKSTREAMS.md for the stream's place in the whole.
 
 ---
 
+## 2026-06-10 — bot-eval M0–M3 shipped: the intelligence layer has opinions
+
+**This session** (continuation; spec written then executed same-day):
+L3 complete — `outcome.ts` (pure lock simulation, tetra's own
+`attackFor`), `features.ts` (18-feature registry: Dellacherie/BCTS
+published set + concept-named set), `profiles.ts` (dellacherie, bcts,
+clean, versus), `suggest.ts` (ranked + per-feature contributions;
+optional lookahead-1 top-K re-rank), `selfplay.ts`/`run.ts` (greedy
+self-play harness, JSON CLI), 25 new tests (43 total in src/bot/).
+
+**Headline numbers** (all deterministic, pinned in benchmarks.test.ts):
+- Published Dellacherie weights complete sprint-40 10/10 at ~102 pieces
+  (floor is 100) — feature implementations calibrated against the
+  literature's own weights.
+- Behavioral splits are real: `clean` digs cheese-18 in 87.5 median
+  pieces vs `versus` 134; `versus` sends 0.285 attack/piece vs
+  dellacherie's 0.0275 (10×) on the endless playground — the versus
+  profile genuinely builds T-spins/quads (visible in cli.ts --profile:
+  it holds pieces, keeps a well, refuses b2b-breaking singles).
+- Lookahead-1 cuts cheese digging 87.5 → 70.5 pieces (−19%) — the
+  research's "depth value saturates early but depth-1 pays" claim
+  reproduced in-house.
+
+**Design notes**: `tslots` counts all *grounded* rot-2 full-spin rests
+(overhung + under-construction slots), not straight drops — first
+attempt missed canonical TSDs, caught by the fixture. M1 deviation
+recorded in the spec: dellacherie likes TSDs too (eroded cells), so
+differentiation is asserted via full-ordering inequality + a b2b
+scenario instead of "dellacherie picks flat". Benchmarks are exact
+gates, not statistics — everything is seeded. Bot suite runs ~19s
+(self-play games); worth it for behavioral contracts.
+
+**Cross-stream flags**: none touching shared engine (L3 is a pure
+consumer; `Engine.b2b`/`combo` were already public). `engine/board.ts`
+metrics now power both GoalSpecs and eval features, as planned.
+
+**Next**: L4 (detectors → idea labels over suggestions) and/or L5
+(policy seam: profiles + vision/speed/finesse gates → an `Opponent` for
+versus). Both now have everything they need. Spec archivable.
+
+## 2026-06-10 — `specs/bot-eval.md` written (L3: features, profiles, suggest)
+
+**This session** (continuation): strategy interview → the L3 spec. No
+code. Key decisions captured in the spec's "standing decisions":
+
+- **Strategies are profiles**: 9-0/6-3/LST/downstacker/versus are weight
+  vectors + parameters over one shared feature set — content, not
+  architecture. Openers/PC/4-wide are explicitly *not* eval features
+  (book data / solver / constraint modules, later specs).
+- **Published sets are anchors, not the destination**: port the feature
+  *functions* (Dellacherie, BCTS) as the durable asset; ship published
+  vectors as `dellacherie`/`bcts` profiles for calibration (if they
+  can't survive sprint-40 on our engine, our features are wrong);
+  hand-seed `clean` + `versus` profiles (Cold Clear relative magnitudes,
+  tetra's own `attackFor` for attack terms). Retune via self-play.
+- **Union feature set**: published predictive features + concept-named
+  ones (holesCreated, wellPurity, tslotsCreated/Wasted, b2bPreserved) —
+  the concept names seed L4's explanation layer.
+- **suggest() returns the why**: score = exact sum of per-feature
+  contributions; interpretability is an invariant with a test.
+- **Benchmarks are level-1 only** (sprint/cheese/slow-survival): plans
+  assume inputs-faster-than-gravity, so the harness must not race
+  marathon gravity. Bounds pinned only after measuring variance
+  (anti-flake discipline).
+
+**Cross-stream notes**: `engine/board.ts` metrics are imported as
+feature primitives (their header anticipated this); pedagogy's new
+`playerHoles` distinction (player-made vs cheese terrain) is exactly
+the kind of concept-named feature L3 wants — reuse it. Optional M1
+touch: `snapshot()` carrying b2b/combo (flag if taken).
+
+**Next**: execute bot-eval M0 (outcome + features) in a fresh session.
+
+## 2026-06-10 — bot-core M3 shipped: spec complete, L0–L2 done
+
+**This session** (same day, continuation): M3 closes `specs/bot-core.md`
+— all four milestones done; the spec is ready to archive once docs are
+deemed settled (`specs/README.md` rule).
+
+- **CLI**: `node src/bot/cli.ts --seed 42 --pieces 5 [--mode cheese]` —
+  prints board, every reachable placement with tags (spin/hold/sd) and
+  its full keypress plan, executes a seeded-random pick per piece. Runs
+  on plain Node (≥23): src/bot followed the repo-wide move to
+  .ts-suffixed runtime imports (another stream converted src/engine this
+  session; `attack.ts` had no imports, so the whole chain is node-clean).
+  One `declare const process` keeps it typed inside the app tsconfig
+  without @types/node.
+- **Corpus**: + rising-garbage dogfood (cheese row every 3rd piece —
+  survival's rise generator without racing its timer) and a wall-mini
+  fixture proving label agreement end-to-end (`T-SPIN MINI SINGLE`).
+- **Perf**: enumerate-with-plans (both pieces) on a mid-game board
+  asserted <10ms, logs actual (typically well under 1ms). No memoization
+  yet — add when `suggest()` exists.
+- **Docs**: `docs/bot.md` (layer map, API, the round-trip property,
+  assumptions); `docs/engine.md` observation surface now lists
+  `snapshot()`. `enumerateCandidates()` exported for L3 (candidates with
+  plans, no re-search).
+
+**Next**: the L3 spec — evaluation features + portable weights
+(Dellacherie/BCTS/Cold Clear) + `suggest()`. Engine/board metrics from
+the pedagogy stream (`engine/board.ts`) are the feature primitives, as
+their header anticipates. 233 tests green repo-wide at session end.
+
 ## 2026-06-10 — bot-core M1+M2 shipped: the enumerator + pathfinder exist
 
 **This session** (continuation of the M0 session): `src/bot/` is born —

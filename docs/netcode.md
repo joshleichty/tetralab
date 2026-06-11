@@ -84,21 +84,58 @@ peer can always decide too.
   tested). This is the format the pedagogy Review surface and bot analysis
   should consume for versus games.
 
-## Still to build (next M6 sessions)
+## Signaling (`signaling.ts`, `signalClient.ts`, `api/signal.ts`)
 
-The headless core above is done and tested. Remaining, in order:
+Vercel functions cannot host WebSockets, and a WebRTC handshake is only a
+handful of messages — so signaling is a poll-based mailbox: one room =
+metadata + a guest slot + two append-only boxes, behind the `SignalStore`
+seam (in-memory for tests/dev; Upstash-REST for prod, accepting both
+`KV_REST_API_*` and `UPSTASH_REDIS_REST_*` env names). `handleSignal` is a
+pure function of `{method, query, body}` × store × injected id/clock;
+`api/signal.ts` is its ~25-line Vercel shell. Client-side, `SignalApi`
+speaks the same request shape through a transport function (tests plug
+`handleSignal` straight in) and `PollingSignalChannel` is the tick-driven
+ordered channel the WebRTC glue consumes. Rooms expire after 15 minutes;
+ids are 6 chars from an unambiguous alphabet.
 
-1. **WebRTC `Transport`** — DataChannel (ordered is fine; the protocol
-   tolerates anything), `RTCPeerConnection` wiring as a thin adapter.
-2. **Signaling** — Vercel functions cannot host WebSockets: serverless
-   functions + marketplace KV (e.g. Upstash Redis) with short polling for
-   the SDP/ICE handshake (a handful of messages). Fallback if polling UX
-   disappoints: managed realtime (Ably/PartyKit) for signaling only.
-   Gameplay traffic is P2P either way.
-3. **Room flow** — create room → shareable URL → nickname → handshake
-   (exchange seed/SDF/config) → synchronized countdown → 1v1 → rematch
-   loop. No accounts, no persistence.
-4. **UI** — side-by-side duel view (parity matrix row), garbage-meter
-   wind-up states (deferred from M5), connection-state surfaces (stall
-   indicator, desync/disconnect end states), match-replay persistence.
-   Disconnect timeouts are a room-layer concern (the core only stalls).
+**Provisioning**: prod needs a marketplace Redis (e.g. Upstash) installed
+on the Vercel project so the REST env vars exist. Without them the
+function falls back to per-instance memory — coherent only under
+`vercel dev`.
+
+## WebRTC edge (`webrtc.ts`)
+
+`connectPeer({role, signal, pc})` runs offer/answer/trickle-ICE over the
+signaling channel and resolves with a `Transport` when the ordered
+DataChannel opens. The peer connection is injected (`PeerConnectionLike`),
+so the glue — strict in-order message processing, ICE buffered until the
+remote description lands, channel adoption, death-during-handshake
+rejection — is fully tested against fakes that enforce the real API's
+ordering rules. `browserPeerConnection()` (a STUN-configured
+`RTCPeerConnection`) is the only untested line. Channel death after open
+surfaces through `Transport.onClose`.
+
+## Room flow (`room.ts`)
+
+`RoomSession` owns everything from "channel open" to "packets flowing":
+both sides send `ready` (protocol version, nickname, SDF) on connect; the
+host rolls a seed and fires `go` (match id, seed, countdown) once both are
+ready; both run the same countdown and tick the `LockstepSession` from
+`playing` on. Rematches re-run `go` with a fresh seed once both sides ask.
+Control messages share the wire with game packets; match-id tags on
+input/desync packets keep one match's final re-flushes out of the next.
+States: `lobby → countdown → playing → ended (→ countdown …) → closed`,
+with `peerLeft` / `peerDisconnected` / `versionClash` flags for the UI.
+A dead connection closes the room (friendly play: no forfeit-win claim).
+
+## Still to build (final M6 session)
+
+1. **Room UI + controller wiring** — create/join screens (invite URL,
+   nickname), duel view (remote board render, parity matrix row),
+   countdown/stall/desync/disconnect surfaces, rematch button; the
+   controller drives `RoomSession.tick` with input dispatched in `onStep`
+   and SDF edits blocked mid-match. Garbage-meter wind-up states
+   (deferred from M5) become meaningful here.
+2. **Match-replay persistence** for online games (`matchReplayFrom`).
+3. **KV provisioning** on the Vercel project (user action) + a live
+   two-browser smoke test through the deployed signaling path.

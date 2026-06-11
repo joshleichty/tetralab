@@ -166,8 +166,11 @@ interface MemoryRoom {
 /** in-memory store for tests and local dev; TTL on an injected clock */
 export class MemorySignalStore implements SignalStore {
   private rooms = new Map<string, MemoryRoom>()
+  private readonly now: () => number
 
-  constructor(private readonly now: () => number = () => Date.now()) {}
+  constructor(now: () => number = () => Date.now()) {
+    this.now = now
+  }
 
   private live(id: string): MemoryRoom | null {
     const room = this.rooms.get(id)

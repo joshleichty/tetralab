@@ -305,3 +305,59 @@ format pedagogy Review / bot analysis should consume · `Engine.stateHash()`
 is available as a cheap whole-state identity assert for any stream's tests ·
 solo `Replay` gained optional `opponent` (additive; `REPLAY_VERSION`
 unchanged — engine rules untouched).
+
+## 2026-06-10 — M6 part 2: online plumbing end-to-end (signaling, WebRTC, room flow)
+
+**This session (runner M6, second half — headless plumbing)**: everything
+between "player clicks create room" and "lockstep packets flow" now
+exists and is tested without a browser. docs/netcode.md updated with
+per-layer sections; UI is the only M6 work left.
+
+- **Signaling** (`src/net/signaling.ts` + `api/signal.ts`): poll-based
+  mailbox for the SDP/ICE handshake — `SignalStore` seam with in-memory
+  (tests/dev) and Upstash-REST (prod; both `KV_REST_API_*` and
+  `UPSTASH_REDIS_REST_*` env names) backends; `handleSignal` is a pure
+  function (injected store/ids/clock) and the Vercel function is a ~25-line
+  shell over it. Rooms: 6-char unambiguous ids, single-occupancy guest
+  slot (NX), 15-min TTL, 32 KB message cap.
+- **Client** (`src/net/signalClient.ts`): `SignalApi` over a transport
+  function (tests call the handler directly; browser uses
+  `fetchSignalTransport`) + `PollingSignalChannel` — tick-driven cadence,
+  ordered sends with head-retry, room-gone surfacing. No wall clock.
+- **WebRTC edge** (`src/net/webrtc.ts`): `connectPeer` → `Transport` on an
+  open ordered DataChannel; `PeerConnectionLike` injection means the glue
+  (sequential handshake processing, early-ICE buffering, death-during-
+  handshake rejection, post-open `Transport.onClose`) is tested against
+  fakes that throw on real-API ordering violations. One untested line:
+  `browserPeerConnection()`.
+- **Room flow** (`src/net/room.ts`): `RoomSession` — `ready` (version/
+  name/SDF) → host-authored `go` (match id, seed, countdown) → lockstep →
+  `ended` → rematch loop with fresh seeds. Control messages multiplex
+  with game packets on one wire; **match-id tags** (new `m` field on
+  input/desync packets, `LockstepSession.cfg.matchId`) keep a finished
+  match's re-flushes out of the next. `bye`/disconnect/version-clash all
+  close the room with distinct flags for the UI.
+- **Tests** (+38, 268 green tree-wide): handler validation/expiry/
+  collision-retry, Redis command shapes vs a fake REST endpoint, polling
+  cadence/cursors/retry-in-order, ICE-before-offer buffering, channel
+  death paths, and full room lifecycles over FakeNetwork — two matches
+  back-to-back through the rematch handshake, leave/disconnect/clash.
+
+**Decisions (mine, flagged)**: signaling is bootstrap-only (config rides
+the DataChannel in `ready`/`go`, not the mailbox) · disconnect = room
+closed, no forfeit-win (friendly invite-link play) · rematch needs both
+sides to ask; host is the only `go` author · `api/` typechecks via
+tsconfig.node.json include.
+
+**Open threads (final M6 session)**: room UI + controller wiring (input
+via `RoomSession.tick`'s `onStep`; block SDF edits mid-match), duel view,
+connection-state surfaces, online match-replay persistence. **User
+action needed before live testing: install a marketplace Redis (e.g.
+Upstash) on the Vercel project** so `api/signal.ts` has KV env vars;
+then a two-browser smoke test through the deployed path.
+
+**Cross-stream flags**: `Transport` gained optional `onClose`;
+input/desync packets gained optional `m` (default 0 — pre-room sessions
+unaffected). Concurrency: bot/pedagogy streams again worked this tree in
+parallel (engine.ts now imports with `.ts` extensions, `erasableSyntaxOnly`
+is on — constructor parameter properties are banned repo-wide now).

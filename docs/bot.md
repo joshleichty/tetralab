@@ -1,15 +1,15 @@
 ---
-summary: The bot substrate (L0–L2) — Position, placement enumerator, keypress pathfinder; the bottom of the intelligence layer.
-read_when: touching src/bot/, building evaluation/policies/detectors on top, or anything that needs "what placements exist and how to execute them".
+summary: The bot layers (L0–L3) — Position, placement enumerator, keypress pathfinder, evaluation/suggest; the intelligence layer.
+read_when: touching src/bot/, building detectors/policies on top, or anything that needs "what placements exist, how to execute them, and how good they are".
 ---
 
-# Bot substrate (`src/bot/`)
+# Bot layers (`src/bot/`)
 
-The bottom three layers of tetra's intelligence layer (bot stream;
-`specs/bot-core.md`, research in `research/bot-engine.md`). Pure,
-headless, deterministic — same rules as `src/engine/` (no DOM, no
-wall-clock, no unseeded randomness); imports engine modules, never the
-reverse.
+The bottom four layers of tetra's intelligence layer (bot stream;
+`specs/bot-core.md` L0–L2, `specs/bot-eval.md` L3; research in
+`research/bot-engine.md`). Pure, headless, deterministic — same rules as
+`src/engine/` (no DOM, no wall-clock, no unseeded randomness); imports
+engine modules, never the reverse.
 
 ## The layer map
 
@@ -17,7 +17,7 @@ reverse.
 L0  Position        plain value: board + piece + queue + hold (+ holdUsed)
 L1  Enumerator      Position → Placement[]            (what is reachable)
 L2  Pathfinder      Position × Placement → InputPlan  (how to get there)
-L3  Eval            Position × Placement × Weights → {score, features}   [next]
+L3  Eval            suggest(pos, profile) → ranked + per-feature "why"
 L4  Detectors       Position × Placement → ConceptTag[]                  [later]
 L5  Policy          Position × Profile → Placement  (TBP-shaped seam)    [later]
 L6  Drivers         Policy → Opponent | Analyzer | CLI runner            [later]
@@ -69,6 +69,39 @@ finesse identities, 34/17/9), TSD chamber, kick-only TST (SRS kick
 index 4), wall mini (`T-SPIN MINI SINGLE`), I-tuck under a ledge,
 random marathon/cheese walks, rising-garbage boards, and an exhaustive
 mid-game sweep.
+
+## L3 — evaluation (`specs/bot-eval.md`)
+
+- `outcome.ts` — `placementOutcome(board, placement, ctx)`: pure lock
+  simulation (collapse, eroded cells, perfect clear) + attack from
+  tetra's own table (`engine/attack.ts`); `EvalContext = {b2b, combo}`
+  (engine counters entering the placement; `Engine.b2b/combo` are public)
+- `features.ts` — the registry: published predictive features
+  (Dellacherie/BCTS: landingHeight, erodedPieceCells, row/column
+  transitions, holes, cumulativeWells, holeDepth, rowsWithHoles) +
+  concept-named ones (holesCreated, maxHeight, bumpiness, deepestWell,
+  tslots, b2bBroken, comboContinued, attack, perfectClear, linesCleared).
+  Every feature: a name, a doc line, a hand-computed test. `tslots`
+  counts grounded rot-2 full-spin rests that would clear — overhung and
+  under-construction slots included.
+- `profiles.ts` — strategies as data: `dellacherie`/`bcts` (published
+  weights verbatim — calibration anchors: they must survive sprint-40 or
+  our features are wrong), `clean` (downstack), `versus` (attack/B2B/
+  T-slot economy). Hand-seeded profiles are tuned via run.ts.
+- `suggest.ts` — the L3 query: ranked `Suggestion[]`, `score` = exact sum
+  of `contributions` (tested invariant). `lookahead: 1` re-ranks the top
+  `lookaheadWidth` (10) candidates by best follow-up with the next known
+  queue piece.
+- `selfplay.ts` / `run.ts` — greedy self-play + the benchmark CLI:
+  `node src/bot/run.ts --profile versus --mode endless --games 10
+  [--lookahead 1]` → JSON (per-game + aggregate). Modes sprint | cheese |
+  endless (level-1 only; endless = survival with the rise timer off).
+- `benchmarks.test.ts` — pinned behavioral gates (deterministic, not
+  statistical): dellacherie completes sprint-40; clean out-digs versus on
+  cheese; versus >2× dellacherie attack/piece on endless; lookahead-1
+  out-digs greedy. Measured 2026-06-10: clean cheese-18 median 87.5
+  pieces (70.5 with lookahead), versus 0.285 attack/piece vs
+  dellacherie's 0.0275.
 
 ## Assumptions & boundaries
 

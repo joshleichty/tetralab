@@ -204,17 +204,16 @@ with a progress entry.
   random walks through marathon (30 pieces) and cheese (15) lock exactly
   `placement.cells` in a real `Engine`; TSD/TST plans produce the
   engine's own `T-SPIN DOUBLE`/`T-SPIN TRIPLE` clear labels.
-- [ ] **M3 — Property suite + CLI demo**: (a) corpus property test —
-  seeded random stacks (drive an engine with a scripted random-placement
-  player), cheese boards, and survival-rise boards; full round-trip on
-  each; (b) a perf check (enumerate+plan on a realistic mid-game board;
-  log the timing, assert a generous ceiling, e.g. <10ms); (c)
-  `src/bot/cli.ts`: given a fixture/seed, print the position and every
-  placement with its plan (`npx tsx src/bot/cli.ts --seed 42 --pieces 5`)
-  — the "headless first" proof. Done when: suite green in CI, CLI output
-  is readable, `docs/bot.md` exists (with `read_when` header) describing
-  the layer map and the L0–L2 API, and `docs/engine.md` notes
-  `snapshot()`.
+- [x] **M3 — Property suite + CLI demo** (2026-06-10): (a) corpus
+  expanded — rising-garbage boards (`insertCheese` between pieces,
+  survival's own generator) plus a wall-mini fixture (engine agrees:
+  `T-SPIN MINI SINGLE`); (b) perf test logs timing and asserts <10ms for
+  enumerate-with-plans, both pieces (typical ≪1ms); (c) `src/bot/cli.ts`
+  runs on plain Node (`node src/bot/cli.ts --seed 42 --pieces 5
+  [--mode cheese]`) — the engine import chain went .ts-suffixed
+  repo-wide, so no tsx needed. `docs/bot.md` written (read_when header,
+  layer map, API, verification story); `docs/engine.md` notes
+  `snapshot()`. Suite green: 22 bot tests, 233 total.
 
 ## Verification
 

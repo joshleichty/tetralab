@@ -1,6 +1,6 @@
-import { bumpiness, holes, isWellPure } from './board'
-import type { Engine } from './engine'
-import type { GameEvent } from './types'
+import { bumpiness, isWellPure, playerHoles } from './board.ts'
+import type { Engine } from './engine.ts'
+import type { GameEvent } from './types.ts'
 
 /**
  * GoalSpecs: declarative pass/fail conditions for lesson challenges,
@@ -15,7 +15,9 @@ import type { GameEvent } from './types'
  */
 
 export type GoalSpec =
-  /** place `pieces` pieces without ever increasing the hole count */
+  /** place `pieces` pieces without ever increasing the player-made hole
+   *  count (playerHoles: cheese/garbage terrain doesn't count, sealing a
+   *  column you still need does — works on downstacking boards too) */
   | { kind: 'noNewHoles'; pieces: number }
   /** clear `n` lines total; with `label`, only clears matching the
    *  ClearInfo label count (e.g. 'T-SPIN DOUBLE', 'QUAD') */
@@ -41,9 +43,9 @@ export function compileGoal(spec: GoalSpec, engine: Engine): GoalEvaluator {
   switch (spec.kind) {
     case 'noNewHoles':
       return new Evaluator(spec, engine, {
-        baseline: (e) => ({ holes: holes(e.board) }),
+        baseline: (e) => ({ holes: playerHoles(e.board) }),
         onLock(e, memo: { holes: number }) {
-          const now = holes(e.board)
+          const now = playerHoles(e.board)
           if (now > memo.holes) return 'failed'
           memo.holes = now
           return null

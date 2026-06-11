@@ -8,6 +8,9 @@ import type { Action } from '../engine/types'
  * swappable production edge.
  */
 
+/** version of the game wire protocol (ready/go/input/…) */
+export const NET_PROTOCOL_VERSION = 1
+
 /**
  * One side's input-stream packet. The protocol is drop- and
  * reorder-tolerant by redundancy: every packet carries the whole unacked
@@ -15,6 +18,8 @@ import type { Action } from '../engine/types'
  */
 export interface InputPacket {
   t: 'input'
+  /** match index within the room; packets from other matches are ignored */
+  m?: number
   /** sender's action stream is complete through this step */
   doneThrough: number
   /** first step this packet's window covers (= last ack received + 1) */
@@ -32,15 +37,33 @@ export interface InputPacket {
 /** a session detected divergent simulations; both sides must end */
 export interface DesyncPacket {
   t: 'desync'
+  /** match index within the room; packets from other matches are ignored */
+  m?: number
   step: number
 }
 
-export type NetMessage = InputPacket | DesyncPacket
+/**
+ * Room control messages (src/net/room.ts) — multiplexed with game packets
+ * on the same ordered DataChannel; `LockstepSession` ignores them.
+ */
+export type ControlMessage =
+  /** sent once on connect: identity + the handling the peer must simulate */
+  | { t: 'ready'; v: number; name: string; sdf: number }
+  /** host starts match `m`: shared seed, synchronized countdown */
+  | { t: 'go'; m: number; seed: number; countdownMs: number }
+  /** sender wants match `m`; the host fires `go` once both sides do */
+  | { t: 'rematch'; m: number }
+  /** sender is leaving the room deliberately */
+  | { t: 'bye' }
+
+export type NetMessage = InputPacket | DesyncPacket | ControlMessage
 
 export interface Transport {
   send(msg: NetMessage): void
   /** delivery callback; assign exactly one consumer */
   onMessage: ((msg: NetMessage) => void) | null
+  /** fired once if the underlying connection dies (WebRTC channel close) */
+  onClose?: (() => void) | null
   close(): void
 }
 

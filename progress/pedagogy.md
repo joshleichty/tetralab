@@ -5,6 +5,107 @@ See WORKSTREAMS.md for the stream's place in the whole.
 
 ---
 
+## 2026-06-10 — M2 done: headless lesson runtime
+
+**This session**: executed training-core M2. New layer `src/learn/`
+(runtime) + `src/lessons/` (content registry); zero React anywhere in it
+— asserted by a test that raw-scans both directories' imports.
+
+- **`learn/types.ts`** — the lesson vocabulary: six step primitives
+  (prose/demo/guidedMove/challenge/recognition/sandbox), `Annotation`
+  (cells/ghost/column/arrow), `RecognitionAnswer` (cell/column/choice).
+  Conventions: boards are bottom-aligned row strings; annotation coords
+  are (column, rows-from-bottom); placements match by locked cells
+  (placementId), so S spawn ≡ S 180 counts as correct.
+  `DemoMove = Placement | { piece, actions }` — the raw-action variant is
+  the T-spin escape hatch flagged in M1 (kicks/tucks demos).
+- **`learn/machine.ts`** — `LessonMachine`: per-step fresh lesson-mode
+  engine; Mathigon gating (prose/demo/sandbox free, gated steps need
+  solved/revealed); wrong guided moves soft-bounce (mistake counted,
+  per-mistake message, board rebuilt to the earned prefix); challenge
+  goals via M0's compileGoal with `retry()`; hint→reveal (reveal plays
+  the real solution and records 'revealed', not solved); back always
+  free, earned gates stay earned; single replaced `feedback` value
+  (quiet-moment discipline).
+- **`learn/harness.ts`** — `validateLesson` (static: boards parse,
+  solutions/answers well-formed, ≤16 steps) + `completeLesson` (drives
+  the machine through every authored solution; throws with
+  lesson/step context). `lessons.test.ts` runs both over the registry —
+  **registering a lesson is what puts it under CI**.
+- **`learn/fumen.ts`** + `scripts/fumen-to-board.ts` — fumen → BoardSpec
+  (import-only interchange; `tetris-fumen` is a devDependency).
+- **`lessons/sample/all-steps.ts`** — the reference lesson, one of each
+  step kind on a real micro-topic (wells & holes); M3's Track A
+  supersedes it as learner content.
+- **goals.ts change**: `noNewHoles` now measures `playerHoles` (M1's
+  metric) — identical on clean boards, correct on garbage boards, which
+  unblocks C-track challenges.
+
+**Cross-stream flags**: none beyond goals.ts above (engine untouched
+otherwise). Challenge `solution` is required — harness and reveal both
+need it; flagged here because lesson authors (M3/M4) must author
+solutions, not just goals.
+
+**Open threads**:
+- M3 next: the lesson player UI + Track A content — **the hard quality
+  gate; read docs/quality-bar.md first**, user sign-off required. Design
+  threads queued from the lesson-structure discussion: challenge
+  strictness (community numbers vs tiers) and caption voice.
+- Recognition 'cell' answers are exact-match; if a lesson wants "any
+  cell in the region", add a region answer kind then (don't pre-build).
+- docs/learn.md lands in M6 per spec; until then this entry + the
+  module docstrings are the map.
+
+---
+
+## 2026-06-10 — M1 done: replay stats layer
+
+**This session**: executed training-core M1. The client stream had
+already shipped the recorder, persistence (cap 20), and round-trip
+identity tests, so M1 reduced to the derived-stats layer:
+
+- **`Replay.presses`** (optional field, no version bump — old replays
+  still play): physical keydowns stamped like actions. New
+  `InputHandler.onPress` hook fires exactly when `keypresses` increments;
+  controller wires it to `recorder.recordPress`. This is what lets
+  replay-derived KPP/finesse match live semantics — DAS/ARR repeats live
+  only in `actions`.
+- **`stats.ts analyzeReplay(replay)`**: instrumented resimulation →
+  per-piece (presses, graded optimum, fault, holes delta, bumpiness) +
+  aggregates (KPP, faults, fault rate, holes created, roughness
+  timeline, cheese blocks/100L) + `verified` (resimulated outcome ==
+  recorded summary). Battle replays analyze through `Match`.
+- **Finesse grading rule** (mirrors live + resolves the two-standard
+  flag for stats): soft-drop pieces ungraded; optimum = no-180 teaching
+  table, or the 180-aware optimum when the player actually pressed 180 —
+  neither input style penalized.
+- **`board.ts playerHoles`**: holes covered by piece cells, not garbage —
+  cheese terrain isn't a stacking mistake; M2/M4 should consider it for
+  C-track `noNewHoles` goals on garbage boards.
+- **CLI**: `node scripts/replay-stats.ts <replay.json> [--index n]
+  [--json]` — works on plain Node because of the import sweep below.
+- Tests: stats suite drives the real `InputHandler` through the exact
+  controller wiring (incl. its no-op log filter); an adaptive digger
+  records a real cheese game for the downstack metric.
+
+**Cross-stream flags**:
+- **Engine-internal imports now carry `.ts` extensions** (mechanical
+  sweep, all value imports): the whole engine chain runs under plain
+  Node via type stripping. bot stream: your `src/bot/cli.ts` "tsx, not
+  plain node" caveat is obsolete — plain `node` works now. Keep new
+  engine modules extension-clean (noted in docs/engine.md invariants).
+- `Replay` format gained optional `presses` (replay.ts is shared with
+  client M6 lockstep work — additive only, playback untouched).
+- `InputHandler` gained an `onPress` hook (additive).
+
+**Open threads**:
+- M2 next (headless lesson runtime). Plan for Track D demo steps needing
+  scripted actions (T-spins can't be expressed by `place()`).
+- Roughness timeline under garbage rises reflects terrain, not just the
+  player's surface — fine for v1, revisit if Review reads it per-piece.
+
+---
+
 ## 2026-06-10 — M0 done: engine substrate; Track 0 agreed
 
 **This session**: executed `specs/training-core.md` M0. All landed in

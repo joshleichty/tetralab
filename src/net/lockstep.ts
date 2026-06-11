@@ -53,6 +53,12 @@ export interface LockstepConfig {
   hashEverySteps?: number
   /** how often (ms of tick time) the outgoing packet flushes */
   flushEveryMs?: number
+  /**
+   * match index within a room (rematch counter): packets tagged with a
+   * different index are ignored, so a previous match's final re-flushes
+   * cannot poison the next one
+   */
+  matchId?: number
 }
 
 export type LockstepStatus = 'playing' | 'won' | 'lost' | 'draw' | 'desynced'
@@ -131,6 +137,7 @@ export class LockstepSession {
       attackDelaySteps: cfg.attackDelaySteps ?? DEFAULT_ATTACK_DELAY_STEPS,
       hashEverySteps: cfg.hashEverySteps ?? DEFAULT_HASH_EVERY,
       flushEveryMs: cfg.flushEveryMs ?? DEFAULT_FLUSH_MS,
+      matchId: cfg.matchId ?? 0,
     }
     this.delay = this.cfg.attackDelaySteps
     this.hashEvery = this.cfg.hashEverySteps
@@ -364,13 +371,16 @@ export class LockstepSession {
     this.status = 'desynced'
     this.stalled = false
     this.sessionEvents.push({ kind: 'desync', step })
-    this.transport.send({ t: 'desync', step })
+    this.transport.send({ t: 'desync', m: this.cfg.matchId, step })
   }
 
   // ── wire protocol ──────────────────────────────────────────────
 
   private processInbox() {
     for (const m of this.inbox) {
+      // not game traffic (room control), or traffic from another match
+      if (m.t !== 'input' && m.t !== 'desync') continue
+      if ((m.m ?? 0) !== this.cfg.matchId) continue
       if (m.t === 'desync') {
         if (this.status !== 'desynced') {
           this.status = 'desynced'
@@ -427,6 +437,7 @@ export class LockstepSession {
     }
     this.transport.send({
       t: 'input',
+      m: this.cfg.matchId,
       doneThrough,
       windowStart: this.peerAck + 1,
       ack: this.R,
