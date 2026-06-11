@@ -9,13 +9,55 @@ import {
   QueueBox,
   StatsPanel,
 } from './ui/Hud'
+import { Learn } from './ui/Learn'
+import { OnlineScreen } from './ui/Online'
 import { Countdown, Menu, PauseOverlay, ResultsOverlay } from './ui/Overlays'
 import { SettingsModal } from './ui/SettingsModal'
+
+/** an invite link (#/vs/code) drops straight into the join flow */
+const inviteCode = window.location.hash.startsWith('#/vs/')
+  ? window.location.hash.slice(5).toLowerCase()
+  : null
 
 export default function App() {
   const ctrl = useGame()
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const inGame = ctrl.phase !== 'menu'
+  const [section, setSection] = useState<'play' | 'learn' | 'online'>(
+    inviteCode ? 'online' : 'play',
+  )
+  const inGame = section === 'play' && ctrl.phase !== 'menu'
+
+  if (section === 'online') {
+    return (
+      <div className="app">
+        <div className="grain" aria-hidden />
+        <span className="corner-mark" aria-hidden>
+          tetra
+        </span>
+        <OnlineScreen
+          ctrl={ctrl}
+          initialCode={ctrl.online ? null : inviteCode}
+          onExit={() => {
+            // replaceState avoids main.tsx's hashchange reload
+            history.replaceState(null, '', window.location.pathname)
+            setSection('play')
+          }}
+        />
+      </div>
+    )
+  }
+
+  if (section === 'learn') {
+    return (
+      <div className="app">
+        <div className="grain" aria-hidden />
+        <span className="corner-mark" aria-hidden>
+          tetra
+        </span>
+        <Learn onExit={() => setSection('play')} />
+      </div>
+    )
+  }
 
   return (
     <div className="app">
@@ -49,7 +91,14 @@ export default function App() {
         </main>
       )}
 
-      {ctrl.phase === 'menu' && <Menu ctrl={ctrl} onOpenSettings={() => setSettingsOpen(true)} />}
+      {ctrl.phase === 'menu' && (
+        <Menu
+          ctrl={ctrl}
+          onOpenSettings={() => setSettingsOpen(true)}
+          onLearn={() => setSection('learn')}
+          onOnline={() => setSection('online')}
+        />
+      )}
       {settingsOpen && <SettingsModal ctrl={ctrl} onClose={() => setSettingsOpen(false)} />}
     </div>
   )

@@ -2,8 +2,11 @@ import { useState } from 'react'
 import type { BattlePreset, GameController } from '../game/controller'
 import { BATTLE_PRESETS } from '../game/controller'
 import type { Mode } from '../engine/types'
+import { loadLearnProgress } from '../game/learnProgress'
 import type { BestRecords } from '../game/settings'
 import { formatTime } from '../game/useGame'
+import { LESSONS } from '../lessons'
+import { TRACKS } from '../lessons/tracks'
 
 const MODES: Array<{ mode: Mode; name: string; desc: string }> = [
   { mode: 'marathon', name: 'marathon', desc: '150 lines · gravity rises every 10' },
@@ -16,10 +19,19 @@ const CHEESE_GOALS = [10, 18, 100] as const
 export function Menu({
   ctrl,
   onOpenSettings,
+  onLearn,
+  onOnline,
 }: {
   ctrl: GameController
   onOpenSettings: () => void
+  onLearn: () => void
+  onOnline: () => void
 }) {
+  const listed = LESSONS.filter((l) => TRACKS.some((t) => t.id === l.track))
+  const learnDone = (() => {
+    const progress = loadLearnProgress()
+    return listed.filter((l) => progress[l.id]).length
+  })()
   const [cheeseGoal, setCheeseGoal] = useState(ctrl.cheeseTotal)
   const [battlePreset, setBattlePreset] = useState<BattlePreset>(ctrl.battlePreset)
   const best = ctrl.best
@@ -86,6 +98,12 @@ export function Menu({
           </span>
         </button>
 
+        <button className="mode-row" style={{ animationDelay: '345ms' }} onClick={onOnline}>
+          <span className="mode-name">1v1 online</span>
+          <span className="mode-desc">invite a friend by link · peer-to-peer</span>
+          <span className="mode-best">—</span>
+        </button>
+
         <span className="mode-group" style={{ animationDelay: '360ms' }}>
           training
         </span>
@@ -128,6 +146,18 @@ export function Menu({
           <span className="mode-desc">garbage keeps rising · outlast it</span>
           <span className="mode-best">
             {best.survival !== undefined ? formatTime(best.survival) : '—'}
+          </span>
+        </button>
+
+        <span className="mode-group" style={{ animationDelay: '510ms' }}>
+          learn
+        </span>
+
+        <button className="mode-row" style={{ animationDelay: '550ms' }} onClick={onLearn}>
+          <span className="mode-name">lessons</span>
+          <span className="mode-desc">stacking &amp; wells · interactive, 3–5 minutes each</span>
+          <span className="mode-best">
+            {learnDone} / {listed.length}
           </span>
         </button>
       </nav>

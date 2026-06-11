@@ -15,6 +15,8 @@ export interface Settings {
   /** SFX volume, 0–100 */
   volume: number
   vfx: boolean
+  /** display name for online 1v1 (no accounts — this is the identity) */
+  nickname: string
   bindings: KeyBindings
 }
 
@@ -29,6 +31,7 @@ export const DEFAULT_SETTINGS: Settings = {
   sound: true,
   volume: 100,
   vfx: true,
+  nickname: '',
   bindings: DEFAULT_BINDINGS,
 }
 

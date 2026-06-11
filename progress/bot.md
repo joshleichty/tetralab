@@ -5,6 +5,32 @@ See WORKSTREAMS.md for the stream's place in the whole.
 
 ---
 
+## 2026-06-10 — Bot Lab: a dev surface for the intelligence layer (#/bot)
+
+**This session** (continuation): `src/ui/BotLab.tsx` — a hash-gated dev
+route (`#/bot`) to see and drive L0–L3. Profile/mode/seed/lookahead/pps
+controls; play/step/reset; the ranked suggestion panel shows score +
+top-3 contributions per candidate (green/red), hover isolates that
+candidate's ghost on a canvas overlay, click places it. Board reuses
+`BoardRenderer` untouched; overlay is a second stacked canvas. Live
+stats: pieces/lines/attack/app, b2b/combo, hold/next.
+
+**Wiring**: gated in `main.tsx` — `#/bot` mounts BotLab *instead of*
+App so the game controller's global key/rAF listeners never start
+(hash changes reload). Styles appended to `styles.css` under
+`.botlab-*`, instrument aesthetic. UI lives in `src/ui/` — `src/bot/`
+stays pure/headless per docs/bot.md.
+
+**Verified in-browser** (vite + Chrome): route mounts, suggestions
+render with contributions, step executes through the real engine (held
+Z → placed T per the versus profile's top pick), ghost overlay draws at
+the correct board coordinates (verified by pixel-scan), layout fits the
+viewport, zero console errors. Tests/lint/build green.
+
+**Cross-stream flags**: touched `src/main.tsx` (3-line root gate) and
+appended to `src/styles.css` — both client-stream surfaces, minimal and
+additive. Usage: `npm run dev` → `http://localhost:<port>/#/bot`.
+
 ## 2026-06-10 — bot-eval M0–M3 shipped: the intelligence layer has opinions
 
 **This session** (continuation; spec written then executed same-day):

@@ -36,11 +36,11 @@ const DROP_FX_MS = 110
 const LOCK_FX_MS = 90
 const SHAKE_MS = 90
 
-function rowToY(row: number): number {
+export function rowToY(row: number): number {
   return (row - VISIBLE_START + VANISH_ROWS) * CELL
 }
 
-function drawMino(
+export function drawMino(
   ctx: CanvasRenderingContext2D,
   px: number,
   py: number,

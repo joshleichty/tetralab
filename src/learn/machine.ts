@@ -3,7 +3,7 @@ import { Engine } from '../engine/engine.ts'
 import { placementId } from '../engine/finesse-gen.ts'
 import { compileGoal } from '../engine/goals.ts'
 import type { GoalEvaluator } from '../engine/goals.ts'
-import type { Action, PieceType } from '../engine/types.ts'
+import type { Action, GameEvent, PieceType } from '../engine/types.ts'
 import type {
   DemoMove,
   Lesson,
@@ -56,6 +56,10 @@ export class LessonMachine {
   demoIndex = 0
   records: StepRecord[]
   feedback: Feedback | null = null
+  /** observer for raw engine events (the UI hangs sounds off this);
+   *  fires before step semantics are applied. Stays optional — the
+   *  machine itself never depends on it. */
+  onEvents: ((events: GameEvent[]) => void) | null = null
 
   private feedbackId = 0
   private revealing = false
@@ -271,6 +275,7 @@ export class LessonMachine {
   private observe() {
     if (!this.engine) return
     const events = this.engine.takeEvents()
+    if (events.length > 0) this.onEvents?.(events)
     const step = this.current()
     const r = this.record()
 

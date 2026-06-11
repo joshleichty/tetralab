@@ -5,6 +5,71 @@ See WORKSTREAMS.md for the stream's place in the whole.
 
 ---
 
+## 2026-06-10 — M3 built: lesson player UI + Track A (sign-off pending)
+
+**This session**: executed training-core M3 — built, browser-verified
+end-to-end, **but the milestone's done-when is a manual design review
+with user sign-off, which has not happened: M3 is not closed.**
+
+- **`src/ui/Learn.tsx`** — Learn home (track list → lesson rows in the
+  menu's mode-row grammar, per-lesson ✓, track tally) + the lesson
+  player: step rail dots left, the game's exact board frame center, card
+  right (kicker, serif caption voice, live goal line for challenges,
+  scripted-queue strip, mistake/hint notes, hint→reveal→continue
+  actions). Enter advances, Backspace goes back, Esc exits, r retries.
+- **`src/game/lessonController.ts`** — DOM shell mirroring
+  GameController: fixed-step loop, real InputHandler (same handling
+  settings), piece sounds via the new `machine.onEvents` hook, feedback
+  sounds ('clear' correct / 'lock' bounce / 'win' complete), demo
+  auto-play at 750ms beats, `window.__tetraLesson` debug handle,
+  completion → `learnProgress.ts` persistence (`tetra.learn.v1`).
+- **`src/render/lessonRenderer.ts`** — wraps BoardRenderer (constant
+  frame) + the annotation vocabulary: cell marks, column wash, dashed
+  placement ghosts, arrows; recognition answers paint green once solved.
+  Feedback choreography is CSS on the frame (quiet green inset pulse /
+  4px shake), never on the canvas.
+- **Track A authored**: 6 lessons × 6 steps (flat nine, keep it flat,
+  never bury a cell, no piece dependencies, 9-0 or 6-3, counting to
+  four) — every one passes the harness; captions in the app's lowercase
+  voice. Menu gained a `learn` group (App.tsx `section` routing, which
+  the client stream's online screen now also uses).
+- **Browser-verified live** (Chrome, real keys): wrong-move bounce with
+  authored message, solve → correct cue → armed continue, challenge
+  goal line counting pieces, recognition column tap, completion card
+  ("clean run" / bounce tally), persistence → home ✓ and menu tally.
+  Two real bugs found and fixed this way: an unstable React ref
+  callback re-creating the renderer every frame (compounding dpr
+  scale → blank board), and the queue strip leaking bag pieces beyond
+  the script.
+
+**Voice/strictness decisions taken (review at sign-off)**: captions are
+lowercase full sentences, dry-warm, no exclamation marks; Track A
+challenges are gentle (the A-track teaches shape, not speed) — community
+numbers enter at Track B+ where the research gives them.
+
+**Cross-stream flags**:
+- App.tsx now routes top-level `section`s; client stream's online screen
+  merged into the same model mid-session — converged cleanly.
+- `machine.onEvents` hook added (additive) so UI layers can voice engine
+  events without touching machine internals.
+- **Bot stream's L0–L2 backbone (user-flagged this session) unblocks M5's
+  cheese seed-pool calibration** — the spec's "scripted player over
+  candidate seeds" is exactly `enumerate → plan → execute`. Also the
+  future review/coach surfaces (post-M6).
+
+**Open threads**:
+- **M3 closes only on the user's design review** — walk Track A
+  end-to-end in the real app (`npm run dev` → learn → the flat nine).
+  Queued questions for that review: caption voice ok? challenge
+  strictness ok? completion card content enough?
+- Lesson player a11y: mode-row buttons carry no accessible names
+  (preexisting pattern); recognition taps have no keyboard path. Worth
+  a pass before M6 landing.
+- M4 (Tracks 0, B, C, D) next after sign-off; Track B guided moves
+  should display sequences from the finesse table.
+
+---
+
 ## 2026-06-10 — M2 done: headless lesson runtime
 
 **This session**: executed training-core M2. New layer `src/learn/`

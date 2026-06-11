@@ -271,7 +271,8 @@ from the end, never compress quality.
   state machine (gating, hint/reveal, progress), fumen import, annotation
   model; the vitest lesson-validation harness. Done when: a sample lesson
   of all six step kinds passes the harness with zero React imported.
-- [ ] **M3 — Lesson player UI + Track A**: the flagship surface — card
+- [ ] **M3 — Lesson player UI + Track A** *(built 2026-06-10; awaiting the
+  design-review sign-off that closes it)*: the flagship surface — card
   grammar, board annotations, feedback choreography, track/lesson
   navigation, progress persistence; Track A's 6 stacking lessons authored
   and polished. Read `docs/quality-bar.md` before starting this milestone.

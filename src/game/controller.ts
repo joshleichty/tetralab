@@ -4,9 +4,15 @@ import { VISIBLE_START } from '../engine/pieces'
 import { ReplayRecorder, STEP_MS } from '../engine/replay'
 import { Match, ScriptedPressureOpponent } from '../engine/versus'
 import type { ScriptedPressureConfig } from '../engine/versus'
+import { matchReplayFrom } from '../net/lockstep'
+import { OnlineConnector } from '../net/online'
+import type { RoomSession } from '../net/room'
+import { fetchSignalTransport } from '../net/signalClient'
+import { browserPeerConnection } from '../net/webrtc'
+import { saveMatchReplay } from './matchReplays'
 import { saveReplay } from './replays'
 import { DEFAULT_ENGINE_CONFIG } from '../engine/types'
-import type { Action, Mode } from '../engine/types'
+import type { Action, GameEvent, Mode } from '../engine/types'
 import { InputHandler } from '../input/keyboard'
 import type { BindableAction } from '../input/keyboard'
 import { sfx } from '../audio/sfx'
@@ -115,6 +121,17 @@ export class GameController {
   countdownLeft = 0
   version = 0
 
+  /** online 1v1: the connector owns signaling → WebRTC → RoomSession */
+  online: OnlineConnector | null = null
+  /** lockstep is frozen waiting on the peer's stream (connection hiccup) */
+  onlineStalled = false
+  /** escape during online play asks instead of pausing (no pause online) */
+  onlineLeavePrompt = false
+  private onlineMatchIndex = -1
+  private onlineEnded = false
+  private remoteRenderer: BoardRenderer | null = null
+  private readonly remoteFx: BoardFx = emptyFx()
+
   private input: InputHandler
   private recorder: ReplayRecorder | null = null
   /** fixed-step index since game start; the replay/netcode time base */
@@ -144,6 +161,7 @@ export class GameController {
     this.input.onPress = (a) => this.recorder?.recordPress(this.step, a)
     this.input.onPause = () => this.togglePause()
     this.input.onRestart = () => {
+      if (this.online) return // online: no instant restart, rematch instead
       if (this.phase !== 'menu') this.start(this.mode)
     }
     this.input.attach(window)
@@ -201,6 +219,11 @@ export class GameController {
 
   /** route an action into the engine, logging it for the replay (D5) */
   private applyAction(a: Action) {
+    // online: the lockstep session owns logging, filtering and the wire
+    if (this.online) {
+      if (this.phase === 'playing') this.room?.session?.applyAction(a)
+      return
+    }
     const e = this.engine
     if (this.phase !== 'playing' || !e) return
     // skip no-op wall shoves (instant ARR fires blind) to keep logs lean
@@ -273,6 +296,14 @@ export class GameController {
   }
 
   togglePause() {
+    // online: the game cannot pause; escape toggles a leave-confirm
+    if (this.online) {
+      if (this.phase === 'playing' || this.phase === 'countdown') {
+        this.onlineLeavePrompt = !this.onlineLeavePrompt
+        this.emit()
+      }
+      return
+    }
     if (this.phase === 'playing') {
       this.phase = 'paused'
       this.emit()
@@ -291,12 +322,189 @@ export class GameController {
   }
 
   quitToMenu() {
+    if (this.online) {
+      this.leaveOnline()
+      return
+    }
     this.phase = 'menu'
     this.engine = null
     this.match = null
     this.recorder = null
     this.result = null
     this.emit()
+  }
+
+  // ── online 1v1 (spec Phase 4; src/net/online.ts orchestrates) ───
+
+  /** the live room, once connected */
+  get room(): RoomSession | null {
+    return this.online?.phase.t === 'room' ? this.online.phase.session : null
+  }
+
+  private makeConnector(): OnlineConnector {
+    return new OnlineConnector({
+      transport: fetchSignalTransport((url, init) => fetch(url, init)),
+      makePc: () => browserPeerConnection(),
+    })
+  }
+
+  private onlineRoomConfig() {
+    return {
+      name: this.settings.nickname.trim() || 'anonymous',
+      sdf: this.settings.sdf,
+    }
+  }
+
+  startOnlineHost() {
+    if (this.online) return
+    sfx.ensure()
+    this.online = this.makeConnector()
+    this.onlineMatchIndex = -1
+    this.online.host(this.onlineRoomConfig())
+    this.emit()
+  }
+
+  startOnlineJoin(code: string) {
+    if (this.online) return
+    sfx.ensure()
+    this.online = this.makeConnector()
+    this.onlineMatchIndex = -1
+    this.online.join(code.trim().toLowerCase(), this.onlineRoomConfig())
+    this.emit()
+  }
+
+  onlineRematch() {
+    this.room?.requestRematch()
+    this.emit()
+  }
+
+  leaveOnline() {
+    this.online?.cancel()
+    this.online = null
+    this.onlineStalled = false
+    this.onlineLeavePrompt = false
+    this.onlineMatchIndex = -1
+    this.onlineEnded = false
+    this.engine = null
+    this.result = null
+    this.phase = 'menu'
+    this.emit()
+  }
+
+  attachRemoteBoard(canvas: HTMLCanvasElement | null) {
+    this.remoteRenderer = canvas ? new BoardRenderer(canvas) : null
+  }
+
+  /** per-frame online drive: connector → room → lockstep session */
+  private onlineFrame(dt: number, now: number) {
+    const o = this.online!
+    const room = this.room
+    if (!room) {
+      // signaling / WebRTC handshake still in flight
+      o.tick(dt)
+      this.phase = 'menu'
+      this.emit()
+      return
+    }
+    const session = room.session
+
+    // a new match began (first `go` or a rematch): reset per-match state
+    if (session && room.matchIndex !== this.onlineMatchIndex) {
+      this.onlineMatchIndex = room.matchIndex
+      this.onlineEnded = false
+      this.onlineLeavePrompt = false
+      this.attackSent = 0
+      this.detail = emptyDetail()
+      this.result = null
+      this.actionLabel = null
+      this.fx = emptyFx()
+      this.danger = false
+      this.input.reset()
+      this.input.resetCounters()
+      sfx.play('ready')
+    }
+    this.engine = session?.localEngine ?? null
+
+    switch (room.state) {
+      case 'lobby':
+        o.tick(dt)
+        this.phase = 'countdown'
+        this.countdownLeft = COUNTDOWN_MS
+        this.input.enabled = false
+        break
+      case 'countdown': {
+        const before = room.countdownLeft
+        o.tick(dt)
+        this.input.update(dt) // DAS pre-charge, exactly like offline
+        if (before > 700 && room.countdownLeft <= 700) sfx.play('go')
+        this.phase = 'countdown'
+        this.countdownLeft = room.countdownLeft
+        this.input.enabled = false
+        break
+      }
+      case 'playing':
+        this.phase = 'playing'
+        this.input.enabled = true
+        // input dispatches on the lockstep step grid, inside the horizon
+        o.tick(dt, () => this.input.update(STEP_MS))
+        if (session) {
+          this.drainEvents(now, session.takeEvents())
+          session.takeRemoteEvents() // rendered as state; no fx/sfx mirror
+          this.onlineStalled = session.stalled
+        }
+        this.updateDanger()
+        break
+      case 'ended':
+        o.tick(dt) // final re-flushes + the remote board catching up
+        if (session) {
+          this.drainEvents(now, session.takeEvents())
+          session.takeRemoteEvents()
+        }
+        if (!this.onlineEnded && session) {
+          this.onlineEnded = true
+          this.onlineStalled = false
+          this.onlineLeavePrompt = false
+          this.input.enabled = false
+          if (session.status === 'won') sfx.play('win')
+          this.finishOnline(session)
+        }
+        this.phase = 'over'
+        break
+      case 'closed':
+        this.input.enabled = false
+        this.onlineStalled = false
+        this.phase = 'over'
+        break
+    }
+    this.emit()
+  }
+
+  /** denormalize stats + persist the match replay (both action streams) */
+  private finishOnline(session: NonNullable<RoomSession['session']>) {
+    const e = session.localEngine
+    const timeMs = e.elapsed
+    this.result = {
+      mode: 'battle',
+      won: session.status === 'won',
+      score: e.score,
+      lines: e.lines,
+      level: e.level,
+      timeMs,
+      pieces: e.piecesPlaced,
+      pps: timeMs > 0 ? e.piecesPlaced / (timeMs / 1000) : 0,
+      isPersonalBest: false,
+      attack: this.attackSent,
+      detail: {
+        ...this.detail,
+        inputs: this.input.keypresses,
+        kpp: e.piecesPlaced > 0 ? this.input.keypresses / e.piecesPlaced : 0,
+      },
+    }
+    saveMatchReplay(matchReplayFrom(session), {
+      outcome: session.status,
+      peerName: this.room?.peerName ?? null,
+      steps: session.localStep,
+    })
   }
 
   updateSettings(patch: Partial<Settings>) {
@@ -310,7 +518,8 @@ export class GameController {
     this.input.bindings = this.settings.bindings
     sfx.enabled = this.settings.sound
     sfx.setVolume(this.settings.volume / 100)
-    if (this.engine && this.engine.cfg.sdf !== this.settings.sdf) {
+    // online: SDF is part of the agreed simulation — never edited mid-match
+    if (!this.online && this.engine && this.engine.cfg.sdf !== this.settings.sdf) {
       this.engine.cfg.sdf = this.settings.sdf
       this.recorder?.recordSdf(this.step, this.settings.sdf)
     }
@@ -339,6 +548,13 @@ export class GameController {
     if (this.destroyed) return
     const dt = Math.min(t - this.lastT, MAX_FRAME_MS)
     this.lastT = t
+
+    if (this.online) {
+      this.onlineFrame(dt, t)
+      this.render(t)
+      this.raf = requestAnimationFrame(this.frame)
+      return
+    }
 
     if (this.phase === 'countdown') {
       const before = this.countdownLeft
@@ -395,10 +611,10 @@ export class GameController {
     this.danger = inDanger
   }
 
-  private drainEvents(now: number) {
+  private drainEvents(now: number, fromOnline?: GameEvent[]) {
     const engine = this.engine!
     let prevKind = ''
-    const events = this.match ? this.match.takeEvents() : engine.takeEvents()
+    const events = fromOnline ?? (this.match ? this.match.takeEvents() : engine.takeEvents())
     for (const ev of events) {
       switch (ev.kind) {
         case 'move':
@@ -465,10 +681,11 @@ export class GameController {
           break
         case 'gameover':
           sfx.play('gameover')
-          this.finish(false)
+          // online: the room layer decides the outcome (peer may die first)
+          if (!this.online) this.finish(false)
           break
         case 'win':
-          this.finish(true)
+          if (!this.online) this.finish(true)
           break
         case 'garbage':
           sfx.play('garbage')
@@ -570,5 +787,8 @@ export class GameController {
     })
     const queue = this.engine ? this.engine.queue.slice(0, this.engine.cfg.queueSize) : []
     this.queueRenderer?.draw(queue.length > 0 ? queue : [null])
+    // online duel view: the simulated opponent board — state only, no fx
+    const remote = this.room?.session?.remoteEngine ?? null
+    this.remoteRenderer?.draw(remote, this.remoteFx, now, false, false, false)
   }
 }
